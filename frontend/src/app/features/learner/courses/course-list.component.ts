@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { LearnerLayoutComponent } from '../layout/learner-layout.component';
 
 @Component({
   selector: 'app-course-list',
   standalone: true,
-  imports: [CommonModule, LearnerLayoutComponent],
+  imports: [CommonModule, LearnerLayoutComponent, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-learner-layout>
@@ -28,7 +29,7 @@ import { LearnerLayoutComponent } from '../layout/learner-layout.component';
         <!-- Course Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           @for (course of courses(); track course.id) {
-            <div class="group relative h-full">
+          <div [routerLink]="['/learner/courses', course.id]" class="group relative h-full">
                <div class="absolute -inset-0.5 bg-gradient-to-br from-primary/20 to-transparent rounded-[2.5rem] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
                
                <div class="relative bg-white dark:bg-[#1e293b]/50 border border-gray-100 dark:border-white/5 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden hover:translate-y-[-8px] transition-all duration-500 flex flex-col h-full shadow-sm">
