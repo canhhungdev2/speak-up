@@ -90,7 +90,8 @@ import { RouterModule } from '@angular/router';
                  <button class="bg-white text-primary px-8 py-4 rounded-2xl font-bold hover:scale-105 transition-transform active:scale-95 shadow-lg">
                    Tiếp tục bài học
                  </button>
-                 <button class="bg-white/20 backdrop-blur-md text-white border border-white/30 px-8 py-4 rounded-2xl font-bold hover:bg-white/30 transition-all">
+                 <button [routerLink]="['/learner/vocabulary/study']"
+                         class="bg-white/20 backdrop-blur-md text-white border border-white/30 px-8 py-4 rounded-2xl font-bold hover:bg-white/30 transition-all">
                    Ôn tập ({{ reviews() }} từ)
                  </button>
                </div>
