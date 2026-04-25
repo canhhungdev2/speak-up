@@ -91,7 +91,7 @@ import { RouterModule } from '@angular/router';
                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
               </div>
               
-              <button class="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary-hover shadow-xl shadow-primary/20 transition-all transform active:scale-95">
+              <button type="button" routerLink="/learner/courses" class="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary-hover shadow-xl shadow-primary/20 transition-all transform active:scale-95">
                 Đăng ký ngay
               </button>
            </form>
