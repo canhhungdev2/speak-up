@@ -11,7 +11,7 @@ import { ThemeService } from '../../../core/services/theme.service';
   template: `
     <div class="min-h-screen bg-gray-50 dark:bg-[#0f172a] flex transition-colors duration-500 font-sans">
       
-      <!-- Sidebar (Mockup Style) -->
+      <!-- Sidebar (Restored Original Style) -->
       <aside [class.translate-x-0]="isMobileMenuOpen()" 
              class="fixed md:sticky top-0 left-0 w-72 h-screen bg-white dark:bg-[#1e293b]/50 dark:backdrop-blur-xl border-r border-gray-200 dark:border-white/5 flex flex-col p-8 z-[100] transition-transform md:translate-x-0 -translate-x-full">
         
@@ -41,6 +41,13 @@ import { ThemeService } from '../../../core/services/theme.service';
                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                  </svg>
                  Khóa học
+              </a>
+              <a routerLink="/learner/vocabulary" routerLinkActive="bg-primary/10 text-primary dark:bg-primary/20"
+                 class="flex items-center gap-4 px-4 py-3.5 text-gray-500 dark:text-slate-400 font-bold rounded-2xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                 </svg>
+                 Từ vựng
               </a>
             </nav>
           </div>
@@ -76,7 +83,7 @@ import { ThemeService } from '../../../core/services/theme.service';
                  </div>
               </div>
               <div>
-                 <p class="text-sm font-black text-gray-900 dark:text-white">Cảnh Hùng</p>
+                 <p class="text-sm font-black text-gray-900 dark:text-white">Cảnh Hưng</p>
                  <p class="text-[10px] font-bold text-primary uppercase">Cấp độ 5</p>
               </div>
            </div>
@@ -85,7 +92,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 
       <!-- Main Layout -->
       <div class="flex-grow flex flex-col min-w-0">
-        <!-- Header (Mockup Style) -->
+        <!-- Header -->
         <header class="h-24 px-8 flex justify-between items-center bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-md sticky top-0 z-[50] border-b border-gray-100 dark:border-white/5">
            <!-- Search Bar -->
            <div class="relative w-full max-w-md hidden md:block">

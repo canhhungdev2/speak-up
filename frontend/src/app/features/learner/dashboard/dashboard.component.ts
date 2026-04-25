@@ -29,7 +29,7 @@ import { RouterModule } from '@angular/router';
               </div>
               <div>
                 <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Từ đã học</p>
-                <h3 class="text-2xl font-black text-gray-900 dark:text-white">1,240</h3>
+                <h3 class="text-2xl font-black text-gray-900 dark:text-white">{{ wordsLearned() | number }}</h3>
               </div>
             </div>
           </div>
@@ -44,7 +44,7 @@ import { RouterModule } from '@angular/router';
               </div>
               <div>
                 <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Đến hạn ôn</p>
-                <h3 class="text-2xl font-black text-gray-900 dark:text-white">45</h3>
+                <h3 class="text-2xl font-black text-gray-900 dark:text-white">{{ wordsDue() }}</h3>
               </div>
             </div>
           </div>
@@ -59,7 +59,7 @@ import { RouterModule } from '@angular/router';
               </div>
               <div>
                 <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Thời gian học</p>
-                <h3 class="text-2xl font-black text-gray-900 dark:text-white">45m</h3>
+                <h3 class="text-2xl font-black text-gray-900 dark:text-white">{{ studyTime() }}m</h3>
               </div>
             </div>
           </div>
@@ -74,7 +74,7 @@ import { RouterModule } from '@angular/router';
               </div>
               <div>
                 <p class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Độ chính xác</p>
-                <h3 class="text-2xl font-black text-gray-900 dark:text-white">92%</h3>
+                <h3 class="text-2xl font-black text-gray-900 dark:text-white">{{ accuracy() }}%</h3>
               </div>
             </div>
           </div>
@@ -165,6 +165,12 @@ export class LearnerDashboardComponent {
   reviews = signal(45);
   selectedDay = signal<string | null>(null);
 
+  // Animated Stats
+  wordsLearned = signal(0);
+  wordsDue = signal(0);
+  studyTime = signal(0);
+  accuracy = signal(0);
+
   forecast = signal([
     { label: 'FRI', value: 5, count: 12 },
     { label: 'SAT', value: 20, count: 54 },
@@ -174,6 +180,36 @@ export class LearnerDashboardComponent {
     { label: 'WED', value: 5, count: 12 },
     { label: 'THU', value: 35, count: 98 },
   ]);
+
+  constructor() {
+    this.animateCount(1240, this.wordsLearned);
+    this.animateCount(45, this.wordsDue);
+    this.animateCount(45, this.studyTime);
+    this.animateCount(92, this.accuracy);
+  }
+
+  private animateCount(target: number, signalRef: any) {
+    const duration = 1500; // 1.5 seconds
+    const start = 0;
+    const startTime = performance.now();
+
+    const update = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function (easeOutExpo)
+      const easeValue = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const currentCount = Math.floor(easeValue * (target - start) + start);
+      
+      signalRef.set(currentCount);
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    };
+
+    requestAnimationFrame(update);
+  }
 
   selectDay(label: string) {
     if (this.selectedDay() === label) {

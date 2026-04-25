@@ -35,19 +35,19 @@ import { LearnerLayoutComponent } from '../layout/learner-layout.component';
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
            <div class="bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-500/20">
               <p class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Đã thuộc</p>
-              <p class="text-2xl font-black text-emerald-700 dark:text-emerald-300">850</p>
+              <p class="text-2xl font-black text-emerald-700 dark:text-emerald-300">{{ masteredCount() }}</p>
            </div>
            <div class="bg-amber-50 dark:bg-amber-500/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-500/20">
               <p class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Đang học</p>
-              <p class="text-2xl font-black text-amber-700 dark:text-amber-300">320</p>
+              <p class="text-2xl font-black text-amber-700 dark:text-amber-300">{{ learningCount() }}</p>
            </div>
            <div class="bg-rose-50 dark:bg-rose-500/10 p-4 rounded-2xl border border-rose-100 dark:border-rose-500/20">
               <p class="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">Đến hạn ôn</p>
-              <p class="text-2xl font-black text-rose-700 dark:text-rose-300">45</p>
+              <p class="text-2xl font-black text-rose-700 dark:text-rose-300">{{ dueCount() }}</p>
            </div>
            <div class="bg-indigo-50 dark:bg-indigo-500/10 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
               <p class="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Mới nạp</p>
-              <p class="text-2xl font-black text-indigo-700 dark:text-indigo-300">12</p>
+              <p class="text-2xl font-black text-indigo-700 dark:text-indigo-300">{{ newCount() }}</p>
            </div>
         </div>
 
@@ -102,4 +102,35 @@ export class VocabularyListComponent {
     { term: 'Interactive', definition: 'Có tính tương tác', level: 2 },
     { term: 'Community', definition: 'Cộng đồng', level: 5 },
   ]);
+
+  // Animated Stats
+  masteredCount = signal(0);
+  learningCount = signal(0);
+  dueCount = signal(0);
+  newCount = signal(0);
+
+  constructor() {
+    this.animateCount(850, this.masteredCount);
+    this.animateCount(320, this.learningCount);
+    this.animateCount(45, this.dueCount);
+    this.animateCount(12, this.newCount);
+  }
+
+  private animateCount(target: number, signalRef: any) {
+    const duration = 1500;
+    const startTime = performance.now();
+
+    const update = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeValue = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      signalRef.set(Math.floor(easeValue * target));
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    };
+
+    requestAnimationFrame(update);
+  }
 }
