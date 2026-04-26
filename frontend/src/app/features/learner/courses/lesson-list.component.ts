@@ -69,7 +69,8 @@ import { LearnerLayoutComponent } from '../layout/learner-layout.component';
                            </svg>
                         </div>
                       } @else {
-                        <button class="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                        <button [routerLink]="['/learner/lesson', lesson.id]" 
+                                class="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
                            Học ngay
                         </button>
                       }
