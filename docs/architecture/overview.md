@@ -4,9 +4,9 @@
 
 | Tầng | Công nghệ | Ghi chú |
 |---|---|---|
-| **Frontend** | Angular 18 (Standalone) | Tailwind CSS, Angular Signals |
+| **Frontend** | Angular 21 (Standalone) | Tailwind CSS, Angular Signals |
 | **Backend** | NestJS | REST API |
-| **Database** | PostgreSQL (Supabase) | Prisma ORM |
+| **Database** | PostgreSQL (Supabase) | TypeORM |
 | **Auth** | Supabase Auth | JWT-based |
 | **Storage** | Supabase Storage | Media files |
 
@@ -28,12 +28,12 @@
 │                                   │
 │  Auth │ Courses │ Vocab │ Progress │
 └───────────────────┬───────────────┘
-                    │ Prisma ORM
+                    │ TypeORM
                     ▼
 ┌───────────────────────────────────┐
 │        Supabase (PostgreSQL)      │
 │                                   │
-│  users │ courses │ vocabulary     │
+│  profiles │ courses │ vocabulary  │
 │  lessons │ user_progress          │
 └───────────────────────────────────┘
 ```

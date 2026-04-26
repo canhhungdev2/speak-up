@@ -67,10 +67,13 @@ Body: { rating: 'good' | 'hard' | 'easy' | 'again' }
 // Backend tính toán nextReviewDate theo thuật toán SM-2
 ```
 
+## Animation & Cảm giác (Feel)
+- [x] **Card Flip**: Hiệu ứng lật thẻ 3D mượt mà bằng CSS `transform` và `backface-visibility`.
+- [x] **Transitions**: Animation chuyển thẻ (slide + fade) cực kỳ cao cấp, mang lại cảm giác mượt mà như app mobile.
+- [x] **Confetti**: Hiệu ứng pháo giấy khi hoàn thành session.
+
 ## TODO / Còn thiếu
-- [ ] Kết nối API `GET /vocabulary/due` để lấy từ thật
-- [ ] Gọi API `POST /vocabulary/:id/review` để lưu kết quả đánh giá
-- [ ] Implement thuật toán SM-2 đầy đủ ở Backend
+- [ ] Kết nối API thực tế để lấy từ đến hạn
+- [ ] Implement thuật toán SM-2 đầy đủ ở Backend (đã có Entity)
 - [ ] Thêm chế độ học Trắc nghiệm (Multiple Choice) cho từ level 2+
-- [ ] Animation chuyển thẻ mượt mà hơn (slide + fade)
 - [ ] Lưu trạng thái session nếu người dùng thoát giữa chừng

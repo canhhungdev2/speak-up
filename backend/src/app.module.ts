@@ -1,12 +1,36 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { User } from './entities/user.entity';
+import { Course } from './entities/course.entity';
+import { Lesson } from './entities/lesson.entity';
+import { Vocabulary } from './entities/vocabulary.entity';
+import { UserVocabulary } from './entities/user-vocabulary.entity';
+import { UserProgress } from './entities/user-progress.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url: configService.get<string>('DATABASE_URL'),
+        entities: [
+          User,
+          Course,
+          Lesson,
+          Vocabulary,
+          UserVocabulary,
+          UserProgress,
+        ],
+        synchronize: true, // Be careful in production, but okay for dev
+      }),
     }),
   ],
   controllers: [AppController],
