@@ -13,6 +13,7 @@ interface LessonSection {
   type: 'article' | 'vocab' | 'story' | 'pov' | 'commentary';
   audioUrl: string;
   content?: string;
+  paragraphs?: { en: string; vi: string; }[]; // New: Bilingual paragraphs
   vocabList?: { term: string; definition: string; }[];
   stories?: { id: string; title: string; transcript: string; audioUrl: string; }[];
 }
@@ -100,7 +101,7 @@ interface LessonSection {
 
         <!-- Main Content Area -->
         <main class="flex-grow overflow-y-auto p-4 md:p-12 bg-gray-50 dark:bg-transparent relative scrollbar-hide">
-           <div class="max-w-3xl mx-auto pb-40 md:pb-32">
+           <div class="max-w-6xl mx-auto pb-40 md:pb-32">
               
               <!-- Section Header -->
               <div class="mb-8 md:mb-12">
@@ -115,8 +116,20 @@ interface LessonSection {
               <!-- Content Switcher -->
               @switch (activeSection().type) {
                  @case ('article') {
-                    <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-serif text-gray-700 dark:text-slate-300 leading-relaxed space-y-6">
-                       {{ activeSection().content }}
+                    <div class="space-y-12">
+                       @for (p of activeSection().paragraphs; track p.en) {
+                          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-20 group">
+                             <!-- English Column -->
+                             <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-800 dark:text-slate-200 leading-relaxed tracking-tight transition-colors group-hover:text-black dark:group-hover:text-white"
+                                  [innerHTML]="p.en">
+                             </div>
+                             
+                             <!-- Vietnamese Column -->
+                             <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-500/80 dark:text-slate-400/80 leading-relaxed italic border-l-2 border-gray-100 dark:border-white/5 pl-8 md:pl-16 transition-all group-hover:text-gray-700 dark:group-hover:text-slate-300 group-hover:border-primary/30"
+                                  [innerHTML]="p.vi">
+                             </div>
+                          </div>
+                       }
                     </div>
                  }
                  @case ('vocab') {
@@ -257,6 +270,7 @@ interface LessonSection {
     :host { display: block; }
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .font-merriweather { font-family: 'Merriweather', serif; }
   `]
 })
 export class LessonPlayerComponent {
@@ -276,13 +290,36 @@ export class LessonPlayerComponent {
       icon: '📄',
       type: 'article',
       audioUrl: 'article.mp3',
-      content: `The power of persistence is one of the most important qualities of successful people. 
-      When we talk about persistence, we mean the ability to continue doing something even when it is difficult.
-      Many people give up when they face challenges, but those who succeed are the ones who keep going.
-      
-      Persistence is not about being the smartest or the fastest. It is about being the most consistent.
-      Consistency leads to habits, and habits lead to mastery. If you practice English for just 15 minutes
-      every single day, you will be much better than someone who practices for 5 hours once a month.`
+      paragraphs: [
+        {
+          en: 'HIGH PRICE OF MOM\'S HELP IS <b>DRAG</b> ON FAMILY BUSINESS',
+          vi: 'GIÁ CAO CỦA VIỆC MẸ GIÚP ĐANG TRỞ THÀNH <b>GÁNH NẶNG</b> CHO DOANH NGHIỆP GIA ĐÌNH'
+        },
+        {
+          en: 'DEAR ABBY:',
+          vi: 'GỬI ABBY THÂN MẾN:'
+        },
+        {
+          en: 'Twenty years ago, my sister and I bought a business from our mother. We all love and respect one another and get along well. We will be finished <b>paying off</b> the business in two years.',
+          vi: 'Hai mươi năm trước, tôi và chị gái đã mua lại doanh nghiệp từ mẹ của chúng tôi. Chúng tôi đều yêu thương, tôn trọng lẫn nhau và hòa thuận với nhau. Chúng tôi sẽ hoàn tất việc thanh toán cho doanh nghiệp này trong hai năm nữa.'
+        },
+        {
+          en: 'Our problem: Mom, who is now 77, still <b>draws a salary</b> from us <b>above and beyond</b> the payment for the business. Her <b>workload</b> has <b>lessened</b> greatly, as it should. She could do all of her work in one day and lessen the <b>burden</b> of her salary. However, she says she\'d "go crazy" if she retired. We don\'t want that. She could still come in as often as she wants and do her personal paperwork, banking, letter-writing, reading, etc. These are all things she does at "work" -- <b>on the clock</b>.',
+          vi: 'Vấn đề của chúng tôi: Mẹ, hiện đã 77 tuổi, vẫn nhận lương từ chúng tôi ngoài khoản tiền thanh toán cho việc mua lại doanh nghiệp. Khối lượng công việc của bà đã giảm đi rất nhiều, đúng như lẽ ra phải vậy. Bà có thể hoàn thành toàn bộ công việc chỉ trong một ngày và giảm bớt gánh nặng từ mức lương của mình. Tuy nhiên, bà nói rằng bà sẽ "phát điên" nếu nghỉ hưu. Chúng tôi không muốn điều đó xảy ra. Bà vẫn có thể đến chỗ làm bất cứ khi nào bà muốn và làm các công việc cá nhân như giấy tờ riêng, giao dịch ngân hàng, viết thư, đọc sách, v.v. Đây đều là những việc bà hiện đang làm tại "nơi làm việc" — trong giờ làm và vẫn được tính lương.'
+        },
+        {
+          en: 'If we try to discuss this, Mom gets hurt and says, "Just let me know when I\'m not worth the money." We don\'t want to do that. We would hope she would see the fairness of this and suggest it herself.',
+          vi: 'Nếu chúng tôi cố gắng thảo luận về vấn đề này, mẹ sẽ bị tổn thương và nói: "Cứ nói cho mẹ biết khi nào mẹ không còn xứng đáng với số tiền đó nữa." Chúng tôi không muốn làm như vậy. Chúng tôi hy vọng bà sẽ tự nhận ra sự hợp lý của vấn đề này và tự mình đề xuất.'
+        },
+        {
+          en: 'Business <b>expenses</b> are <b>going through the roof</b>, and there are <b>updates</b> we should make, but we can\'t do it as long as we are paying Mom at the level we are, <b>on top of</b> the money for the <b>buy-out</b>.',
+          vi: 'Chi phí kinh doanh đang tăng vọt, và có nhiều cải tiến mà chúng tôi nên thực hiện, nhưng chúng tôi không thể làm được điều đó khi vẫn đang trả lương cho mẹ ở mức như hiện tại, cộng thêm khoản tiền cho việc mua lại doanh nghiệp.'
+        },
+        {
+          en: '-- DAUGHTERS DEAREST',
+          vi: '-- NHỮNG NGƯỜI CON GÁI THÂN YÊU'
+        }
+      ]
     },
     {
       id: 'vocab',

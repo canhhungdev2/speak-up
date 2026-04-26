@@ -1,18 +1,26 @@
 # Database Schema — SpeakUp
 
-> ⚠️ Schema này đã được triển khai thông qua **TypeORM Entities**.
+> ⚠️ Schema này đã được triển khai thông qua **TypeORM Entities**. Toàn bộ các bảng đều hỗ trợ lưu trữ dữ liệu học tập và quản lý người dùng.
 
 ## Bảng chính (Entities)
 
-### `User` (profiles table)
-Được quản lý bởi **Supabase Auth**. Bảng `profiles` chứa thông tin bổ sung.
+### `User` (Bảng `profiles`)
+Lưu trữ thông tin chi tiết của người học, mở rộng từ bảng `auth.users` của Supabase.
+- `id`: Định danh duy nhất (UUID), khớp với ID từ Supabase Auth.
+- `username`: Tên người dùng hiển thị trên hệ thống.
+- `role`: Phân quyền (ví dụ: `learner` cho học viên, `admin` cho quản trị viên).
+- `level`: Cấp độ hiện tại của người học (dựa trên XP).
+- `xp`: Tổng điểm kinh nghiệm tích lũy được qua các bài học.
+- `streak`: Số ngày học tập liên tục.
+- `last_active`: Ngày cuối cùng người dùng có hoạt động.
+- `created_at`: Thời điểm tạo tài khoản.
 
 ```typescript
 @Entity('profiles')
 export class User {
-  @PrimaryColumn('uuid') id: string; // From Supabase Auth
+  @PrimaryColumn('uuid') id: string; 
   @Column() username: string;
-  @Column() role: string;           // 'learner' | 'admin'
+  @Column() role: string;           
   @Column() level: number;
   @Column() xp: number;
   @Column() streak: number;
@@ -21,21 +29,38 @@ export class User {
 }
 ```
 
-### `Course` (courses table)
+### `Course` (Bảng `courses`)
+Chứa thông tin về các khóa học tiếng Anh.
+- `id`: ID tự tăng của khóa học.
+- `title`: Tên khóa học (ví dụ: "Real English").
+- `description`: Mô tả nội dung và mục tiêu của khóa học.
+- `level`: Độ khó (`beginner`, `intermediate`, `advanced`).
+- `thumbnail`: Đường dẫn đến ảnh đại diện của khóa học.
+- `order_index`: Thứ tự hiển thị của khóa học trong danh sách.
+
 ```typescript
 @Entity('courses')
 export class Course {
   @PrimaryGeneratedColumn() id: number;
   @Column() title: string;
   @Column() description: string;
-  @Column() level: string;          // 'beginner' | 'intermediate' | 'advanced'
+  @Column() level: string;          
   @Column() thumbnail: string;
   @Column() order_index: number;
   @OneToMany(() => Lesson, lesson => lesson.course) lessons: Lesson[];
 }
 ```
 
-### `Lesson` (lessons table)
+### `Lesson` (Bảng `lessons`)
+Lưu trữ các bài học thuộc một khóa học.
+- `course_id`: Khóa ngoại liên kết với bảng `courses`.
+- `title`: Tên bài học.
+- `type`: Loại bài học (`video`, `audio`, `story`, `quiz`).
+- `content_url`: Đường dẫn đến file media (video/audio) trên Supabase Storage.
+- `content_bilingual`: Dữ liệu bài đọc song ngữ (JSONB), lưu các cặp đoạn văn Anh - Việt.
+- `duration`: Thời lượng của bài học (tính bằng giây).
+- `order_index`: Thứ tự của bài học trong khóa học.
+
 ```typescript
 @Entity('lessons')
 export class Lesson {
@@ -43,14 +68,24 @@ export class Lesson {
   @Column() course_id: number;
   @ManyToOne(() => Course) course: Course;
   @Column() title: string;
-  @Column() type: string;           // 'video' | 'audio' | 'story' | 'quiz'
+  @Column() type: string;           
   @Column() content_url: string;
+  @Column({ type: 'jsonb' }) content_bilingual: { en: string; vi: string; }[];
   @Column() duration: number;
   @Column() order_index: number;
 }
 ```
 
-### `Vocabulary` (vocabulary table)
+### `Vocabulary` (Bảng `vocabulary`)
+Lưu trữ kho từ vựng đi kèm theo từng bài học.
+- `lesson_id`: Liên kết với bài học chứa từ vựng này.
+- `term`: Từ tiếng Anh.
+- `ipa`: Phiên âm quốc tế.
+- `definition`: Ý nghĩa tiếng Việt.
+- `example`: Câu ví dụ sử dụng từ.
+- `word_type`: Loại từ (`n`, `v`, `adj`, `adv`).
+- `audio_url`: Đường dẫn file phát âm của từ.
+
 ```typescript
 @Entity('vocabulary')
 export class Vocabulary {
@@ -66,7 +101,16 @@ export class Vocabulary {
 }
 ```
 
-### `UserVocabulary` (SRS State)
+### `UserVocabulary` (Bảng `user_vocabulary`)
+Lưu trạng thái học tập của từng từ vựng đối với từng người dùng (Dùng cho hệ thống SRS).
+- `user_id`: ID của người học.
+- `vocabulary_id`: ID của từ vựng.
+- `srs_level`: Mức độ ghi nhớ (thường từ 0-5).
+- `ease_factor`: Hệ số độ dễ (theo thuật toán SM-2), dùng để tính ngày ôn tiếp theo.
+- `interval`: Khoảng thời gian (số ngày) cho lần ôn tập tới.
+- `next_review`: Ngày dự kiến người học cần ôn lại từ này.
+- `last_reviewed`: Thời điểm cuối cùng người học thực hiện ôn từ này.
+
 ```typescript
 @Entity('user_vocabulary')
 @Unique(['user_id', 'vocabulary_id'])
@@ -74,9 +118,9 @@ export class UserVocabulary {
   @PrimaryGeneratedColumn() id: number;
   @Column() user_id: string;
   @Column() vocabulary_id: number;
-  @Column() srs_level: number;      // 0-5
-  @Column() ease_factor: number;    // SM-2 Factor
-  @Column() interval: number;       // Days
+  @Column() srs_level: number;      
+  @Column() ease_factor: number;    
+  @Column() interval: number;       
   @Column() next_review: Date;
   @Column() last_reviewed: Date;
 }

@@ -17,6 +17,7 @@ Mọi thay đổi quan trọng về code (đặc biệt là logic nghiệp vụ,
 ## 3. Cách viết tài liệu
 - **Ngôn ngữ**: Sử dụng tiếng Việt cho các mô tả nghiệp vụ và giải thích. Sử dụng tiếng Anh cho các thuật ngữ kỹ thuật, tên biến, tên hàm.
 - **Mã nguồn**: Sử dụng các khối code markdown (```typescript, ```sql) để minh họa logic.
+- **Định dạng Nội dung**: Đối với các nội dung bài học cần bôi đậm hoặc in nghiêng (ví dụ highlight từ vựng), hãy sử dụng trực tiếp các thẻ HTML cơ bản như `<b>`, `<i>` trong chuỗi văn bản. Frontend sẽ render chúng thông qua thuộc tính `innerHTML`.
 - **Trạng thái**: Sử dụng các biểu tượng:
     - ✅ : Hoàn thành
     - 🚧 : Đang thực hiện / Mock

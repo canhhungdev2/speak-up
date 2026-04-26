@@ -15,7 +15,8 @@ docs/
 │   ├── 03-04-courses-and-lessons.md # Khóa học và Bài học
 │   ├── 05-vocabulary.md         # Quản lý từ vựng
 │   ├── 06-srs-study.md          # Hệ thống ôn tập SRS
-│   └── 07-admin-panel.md        # Hệ thống quản trị (Admin)
+│   ├── 07-admin-panel.md        # Hệ thống quản trị (Admin)
+│   └── 08-lesson-player.md      # Màn hình học bài (Song ngữ)
 ├── database/
 │   └── schema.md                # Mô tả schema database (TypeORM)
 └── workflow.md                  # Quy trình bảo trì tài liệu
@@ -39,3 +40,4 @@ docs/
 | My Vocabulary | ✅ UI hoàn chỉnh | Dữ liệu tĩnh |
 | SRS Study (Flashcard) | ✅ Hoàn thiện UI | Đã thêm animation & TTS cao cấp |
 | Admin Panel | 🚧 Đang xây dựng | Đã có Dashboard & Layout |
+| Lesson Player | ✅ Hoàn thiện UI | Giao diện song ngữ Anh - Việt |

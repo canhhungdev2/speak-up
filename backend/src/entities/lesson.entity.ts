@@ -23,6 +23,9 @@ export class Lesson {
   @Column({ nullable: true })
   content_url: string;
 
+  @Column({ type: 'jsonb', nullable: true })
+  content_bilingual: { en: string; vi: string; }[];
+
   @Column({ nullable: true })
   duration: number;
 
