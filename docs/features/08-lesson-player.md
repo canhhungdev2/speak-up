@@ -6,7 +6,7 @@ Màn hình học bài chính, nơi học viên tương tác với nội dung bà
 ## Đường dẫn
 - **URL**: `/learner/courses/:courseId/lessons/:lessonId` (Mock điều hướng qua lesson list)
 - **File**: `frontend/src/app/features/learner/courses/lesson-player.component.ts`
-- **Layout**: `LearnerLayoutComponent` (Chế độ Slim)
+- **Layout**: `LearnerLayoutComponent` (Full Sidebar)
 
 ## Các thành phần giao diện
 

@@ -24,7 +24,7 @@ interface LessonSection {
   imports: [CommonModule, RouterModule, LearnerLayoutComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-learner-layout [isSlim]="true" [title]="lessonTitle()" (onBack)="goBack()">
+    <app-learner-layout [isSlim]="false" [title]="lessonTitle()" (onBack)="goBack()">
       <div class="flex h-[calc(100vh-6rem)] overflow-hidden relative">
         
         <!-- Mobile Section Selector (Floating Button) -->
