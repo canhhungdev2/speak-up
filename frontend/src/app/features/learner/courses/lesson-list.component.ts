@@ -92,11 +92,11 @@ export class LessonListComponent {
     level: 'Cơ bản',
     image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200',
     lessons: [
-      { id: 1, title: 'Giới thiệu về phương pháp', type: 'Video', duration: '5m', completed: true },
-      { id: 2, title: 'Câu chuyện: Day of the Dead', type: 'Story', duration: '15m', completed: false },
-      { id: 3, title: 'Phản xạ Mini-Story 1', type: 'Audio', duration: '20m', completed: false },
-      { id: 4, title: 'Phản xạ Mini-Story 2', type: 'Audio', duration: '18m', completed: false },
-      { id: 5, title: 'Bài tập trắc nghiệm', type: 'Quiz', duration: '10m', completed: false },
+      { id: 1, title: 'Day Of The Dead', type: 'Video', duration: '5m', completed: true },
+      { id: 2, title: 'A Kiss', type: 'Story', duration: '15m', completed: false },
+      { id: 3, title: "Bubba's food", type: 'Audio', duration: '20m', completed: false },
+      { id: 4, title: 'Changed', type: 'Audio', duration: '18m', completed: false },
+      { id: 5, title: 'Drag', type: 'Quiz', duration: '10m', completed: false },
     ]
   });
 }
