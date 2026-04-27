@@ -1,43 +1,40 @@
 # Tính năng 07 — Admin Panel (Hệ thống Quản trị)
 
 ## Mô tả
-Giao diện dành riêng cho quản trị viên để quản lý nội dung khóa học, bài học, từ vựng và người dùng.
+Giao diện quản trị cao cấp dành cho quản trị viên, được thiết kế theo phong cách hiện đại (Glassmorphism) với hiệu ứng viền neon phát sáng. Hỗ trợ đầy đủ chế độ Sáng/Tối.
 
 ## Đường dẫn
 - **URL**: `/admin`
-- **File**: `frontend/src/app/features/admin/dashboard/dashboard.component.ts`
-- **Layout**: `AdminLayout` (Sidebar chuyên biệt)
+- **Bố cục chính (Layout)**: `frontend/src/app/features/admin/layout/admin-layout.component.ts`
+- **Trang Dashboard**: `frontend/src/app/features/admin/dashboard/dashboard.component.ts`
 
-## Các thành phần giao diện
+## Các thành phần giao diện mới
 
-### 1. Dashboard Stats
-Hiển thị các chỉ số tổng quan của hệ thống:
-- Tổng người dùng (kèm % tăng trưởng)
-- Doanh thu
-- Bài học đã hoàn thành
-- Tỷ lệ hoàn thành trung bình
+### 1. Hệ thống Layout & Sidebar
+- **Sidebar**: Thiết kế tinh tế với logo thương hiệu, các mục điều hướng có hiệu ứng hover và active rõ rệt.
+- **Theme Toggle**: Nút chuyển đổi nhanh giao diện Sáng/Tối tích hợp ở cuối Sidebar.
+- **Header**: Thanh công cụ chứa lời chào người dùng, ô tìm kiếm và thông báo.
 
-### 2. Sidebar Điều hướng
-- Dashboard
-- Quản lý khóa học (Courses)
-- Quản lý người dùng (Users)
+### 2. Dashboard Stats (Glow Cards)
+Sử dụng các thẻ thống kê với hiệu ứng "Glow" (phát sáng) theo màu sắc đại diện:
+- **Tổng học viên**: Màu Hồng (Rose)
+- **Khóa học hiện có**: Màu Tím (Purple) - Lấy dữ liệu thật từ database.
+- **Tỷ lệ hoàn thành**: Màu Xanh lục (Emerald) - Kèm biểu đồ sparkline.
+- **Doanh thu tháng**: Màu Xanh dương (Blue) - Kèm biểu đồ cột.
 
-### 3. Recent Activity Table
-Bảng hiển thị các hoạt động mới nhất của người dùng trên hệ thống, bao gồm:
-- Tên người dùng
-- Hành động thực hiện
-- Thời gian (time ago)
-- Trạng thái (Thành công, Mới, v.v.)
+### 3. Bảng Quản lý khóa học (Refined Table)
+Bảng dữ liệu được thiết kế lại hoàn toàn:
+- Hiển thị ảnh thumbnail khóa học với hiệu ứng zoom khi hover.
+- Huy hiệu trạng thái (Status Badges) đa dạng màu sắc.
+- Cột hành động với các nút Chỉnh sửa/Xóa có hiệu ứng hover nhanh.
+
+## Cấu trúc Component
+- `StatCardComponent`: Thành phần hiển thị chỉ số với hiệu ứng phát sáng tùy biến.
+- `CourseTableComponent`: Thành phần bảng quản lý dữ liệu chuyên dụng.
 
 ## TODO / Còn thiếu
-- [ ] Xây dựng màn hình danh sách Khóa học (Course List management)
-- [ ] Xây dựng màn hình danh sách Bài học (Lesson List management)
+- [ ] Xây dựng chi tiết màn hình Quản lý người dùng (`/admin/users`)
+- [ ] Xây dựng chi tiết màn hình Phân tích (`/admin/analytics`)
 - [ ] Chức năng phân quyền (Role-based Guard) cho route `/admin`
-- [ ] Chức năng Load More / Pagination cho các bảng dữ liệu
-- [ ] Công cụ VTT Creator (tách transcript thành phụ đề)
-
-## Tính năng nâng cao: Smart Content Editor
-Để giải quyết việc nhập liệu bài đọc song ngữ (2 cột) không bị thủ công, Admin Panel sẽ tích hợp trình soạn thảo thông minh:
-1. **Auto-Pairing**: Admin dán toàn bộ văn bản Tiếng Anh và Tiếng Việt vào 2 ô riêng biệt. Hệ thống tự động tách theo dấu xuống dòng và ghép cặp thành các đoạn song ngữ.
-2. **Visual Block Builder**: Cho phép kéo thả để thay đổi thứ tự các đoạn văn, thêm hoặc xóa từng cặp đoạn dễ dàng.
-3. **Preview Realtime**: Xem trước hiển thị 2 cột ngay trong màn hình quản trị để đảm bảo độ dài các đoạn tương đồng nhau.
+- [ ] Tích hợp API thật cho toàn bộ các chỉ số thống kê (hiện đang dùng mock cho một số mục)
+- [ ] Công cụ VTT Creator (tách transcript thành phụ đề) tích hợp vào màn hình tạo bài học
