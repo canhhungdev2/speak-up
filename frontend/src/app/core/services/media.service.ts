@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { parseVtt, StorySentence } from '../utils/vtt-parser';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MediaService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:3000/media';
+  private readonly baseUrl = `${environment.apiBaseUrl}/media`;
 
   getMediaUrl(type: 'audio' | 'vtt', filename: string): string {
     return `${this.baseUrl}/${type}/${filename}`;
