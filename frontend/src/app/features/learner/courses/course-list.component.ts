@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { CourseService } from '../../../core/services/course.service';
 
 @Component({
   selector: 'app-course-list',
@@ -27,13 +28,13 @@ import { RouterModule } from '@angular/router';
       <!-- Course Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @for (course of courses(); track course.id) {
-        <div [routerLink]="['/learner/courses', course.id]" class="group relative h-full">
+        <div [routerLink]="['/learner/courses', course.slug]" class="group relative h-full">
               <div class="absolute -inset-0.5 bg-gradient-to-br from-primary/20 to-transparent rounded-[2.5rem] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
               
               <div class="relative bg-white dark:bg-[#1e293b]/50 border border-gray-100 dark:border-white/5 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden hover:translate-y-[-8px] transition-all duration-500 flex flex-col h-full shadow-sm">
                 <!-- Thumbnail -->
                 <div class="h-56 relative overflow-hidden">
-                  <img [src]="course.image" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" [alt]="course.title">
+                  <img [src]="course.thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" [alt]="course.title">
                   <div class="absolute inset-0 bg-gradient-to-t from-gray-900/40 dark:from-[#0f172a] via-transparent to-transparent"></div>
                   <div class="absolute top-6 left-6 bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/20 px-4 py-1.5 rounded-xl text-xs font-black text-white uppercase tracking-widest">
                       {{ course.level }}
@@ -49,13 +50,13 @@ import { RouterModule } from '@angular/router';
 
                   <div class="flex items-center gap-6 pt-6 border-t border-gray-50 dark:border-white/5">
                       <div class="flex items-center gap-2 text-gray-400 dark:text-slate-500 text-xs font-bold">
-                        <span class="text-orange-500">★</span> {{ course.rating }}
+                        <span class="text-orange-500">★</span> {{ course.rating || 5.0 }}
                       </div>
                       <div class="flex items-center gap-2 text-gray-400 dark:text-slate-500 text-xs font-bold">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
-                        {{ course.lessons }} Bài
+                        {{ course.lessons_count || 0 }} Bài
                       </div>
                       <button class="ml-auto w-12 h-12 bg-gray-100 dark:bg-white/10 rounded-2xl flex items-center justify-center text-gray-600 dark:text-white hover:bg-primary hover:text-white transition-all hover:scale-110 active:scale-95 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,37 +76,11 @@ import { RouterModule } from '@angular/router';
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   `]
 })
-export class CourseListComponent {
-  courses = signal([
-    {
-      id: 1,
-      title: 'Original English',
-      description: 'Học cách phản xạ tiếng Anh tự nhiên qua câu chuyện thú vị về lễ hội người chết tại Mexico.',
-      level: 'Cơ bản',
-      rating: 4.9,
-      lessons: 7,
-      students: '1.2k',
-      image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      id: 2,
-      title: 'Real English',
-      description: 'Làm chủ các âm cơ bản và quy tắc nhấn trọng âm để nói tiếng Anh tự nhiên như người bản xứ.',
-      level: 'Mọi cấp độ',
-      rating: 4.8,
-      lessons: 30,
-      students: '3.5k',
-      image: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      id: 3,
-      title: 'Flow English',
-      description: 'Học cách viết email, thuyết trình và thảo luận trong môi trường làm việc chuyên nghiệp.',
-      level: 'Trung cấp',
-      rating: 4.7,
-      lessons: 15,
-      students: '800',
-      image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800'
-    }
-  ]);
+export class CourseListComponent implements OnInit {
+  private courseService = inject(CourseService);
+  courses = this.courseService.courses;
+
+  ngOnInit() {
+    this.courseService.findAll().subscribe();
+  }
 }

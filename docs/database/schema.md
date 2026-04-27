@@ -37,6 +37,7 @@ Chứa thông tin về các khóa học tiếng Anh.
 - `level`: Độ khó (`beginner`, `intermediate`, `advanced`).
 - `thumbnail`: Đường dẫn đến ảnh đại diện của khóa học.
 - `order_index`: Thứ tự hiển thị của khóa học trong danh sách.
+- `slug`: Đường dẫn thân thiện (ví dụ: `real-english`). Duy nhất và được đánh chỉ mục.
 
 ```typescript
 @Entity('courses')
@@ -47,6 +48,7 @@ export class Course {
   @Column() level: string;          
   @Column() thumbnail: string;
   @Column() order_index: number;
+  @Column({ unique: true }) @Index() slug: string;
   @OneToMany(() => Lesson, lesson => lesson.course) lessons: Lesson[];
 }
 ```
@@ -60,6 +62,7 @@ Lưu trữ các bài học thuộc một khóa học.
 - `content_bilingual`: Dữ liệu bài đọc song ngữ (JSONB), lưu các cặp đoạn văn Anh - Việt.
 - `duration`: Thời lượng của bài học (tính bằng giây).
 - `order_index`: Thứ tự của bài học trong khóa học.
+- `slug`: Đường dẫn thân thiện (ví dụ: `the-turtle-story`). Duy nhất và được đánh chỉ mục.
 
 ```typescript
 @Entity('lessons')
@@ -73,6 +76,7 @@ export class Lesson {
   @Column({ type: 'jsonb' }) content_bilingual: { en: string; vi: string; }[];
   @Column() duration: number;
   @Column() order_index: number;
+  @Column({ unique: true }) @Index() slug: string;
 }
 ```
 

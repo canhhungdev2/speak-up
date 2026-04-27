@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { slugify } from '../common/utils/slugify';
 import { Lesson } from './lesson.entity';
 
 @Entity('courses')
@@ -20,6 +21,18 @@ export class Course {
 
   @Column({ default: 0 })
   order_index: number;
+
+  @Column({ unique: true })
+  @Index()
+  slug: string;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  generateSlug() {
+    if (this.title) {
+      this.slug = slugify(this.title);
+    }
+  }
 
   @CreateDateColumn()
   created_at: Date;

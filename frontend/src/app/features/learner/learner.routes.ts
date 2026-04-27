@@ -16,8 +16,8 @@ export const LEARNER_ROUTES: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: LearnerDashboardComponent },
       { path: 'courses', component: CourseListComponent },
-      { path: 'courses/:id', component: LessonListComponent },
-      { path: 'lesson/:id', component: LessonPlayerComponent },
+      { path: 'courses/:courseSlug', component: LessonListComponent },
+      { path: 'courses/:courseSlug/lessons/:lessonSlug', component: LessonPlayerComponent },
       { path: 'vocabulary', component: VocabularyListComponent },
       { path: 'vocabulary/study', component: StudyComponent },
     ]

@@ -1,10 +1,11 @@
 import {
   Component, ChangeDetectionStrategy, signal, computed,
-  inject, effect
+  inject, effect, OnInit
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MediaService } from '../../../core/services/media.service';
+import { LessonService } from '../../../core/services/lesson.service';
 
 interface StorySentence {
   text: string;
@@ -297,12 +298,13 @@ interface LessonSection {
     .font-merriweather { font-family: 'Merriweather', serif; }
   `]
 })
-export class LessonPlayerComponent {
+export class LessonPlayerComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private mediaService = inject(MediaService);
+  private lessonService = inject(LessonService);
 
-  lessonTitle = signal('The Power of Persistence');
+  lessonTitle = signal('Loading...');
   isSectionMenuOpen = signal(false);
   activeStoryIndex = signal(0);
   isPlaying = signal(false);
@@ -417,6 +419,8 @@ export class LessonPlayerComponent {
     }
   ]);
 
+  lessonData = signal<any>(null);
+
   activeSection = signal<LessonSection>(this.sections()[0]);
   completedSections = signal<Set<string>>(new Set());
 
@@ -435,7 +439,37 @@ export class LessonPlayerComponent {
     return story.sentences.findIndex(s => time >= s.startTime && time < s.endTime);
   });
 
-  constructor() {
+  private scrollEffect = effect(() => {
+    const index = this.currentSentenceIndex();
+    if (index >= 0) {
+      const element = document.getElementById(`sentence-${index}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  });
+
+  ngOnInit() {
+    const courseSlug = this.route.snapshot.paramMap.get('courseSlug');
+    const lessonSlug = this.route.snapshot.paramMap.get('lessonSlug');
+
+    if (courseSlug && lessonSlug) {
+      this.lessonService.findOneBySlug(courseSlug, lessonSlug).subscribe(lesson => {
+        this.lessonTitle.set(lesson.title);
+        this.lessonData.set(lesson);
+        
+        // Cập nhật section Article với dữ liệu từ DB
+        const sections = this.sections();
+        const articleSection = sections.find(s => s.id === 'article');
+        if (articleSection && lesson.content_bilingual) {
+          articleSection.paragraphs = lesson.content_bilingual;
+        }
+        
+        // Nếu là story, cần setup media
+        this.updateAudioSource();
+      });
+    }
+
     this.audio.addEventListener('timeupdate', () => {
       this.currentTime.set(this.audio.currentTime);
     });
@@ -456,16 +490,6 @@ export class LessonPlayerComponent {
     // Auto-load audio for the first section
     this.updateAudioSource();
 
-    // Auto-scroll effect
-    effect(() => {
-      const index = this.currentSentenceIndex();
-      if (index >= 0) {
-        const element = document.getElementById(`sentence-${index}`);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }
-    });
   }
 
   setActiveSection(section: LessonSection) {

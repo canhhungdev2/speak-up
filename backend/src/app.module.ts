@@ -10,6 +10,8 @@ import { Vocabulary } from './entities/vocabulary.entity';
 import { UserVocabulary } from './entities/user-vocabulary.entity';
 import { UserProgress } from './entities/user-progress.entity';
 import { MediaModule } from './modules/media/media.module';
+import { CoursesModule } from './modules/courses/courses.module';
+import { LessonsModule } from './modules/lessons/lessons.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { MediaModule } from './modules/media/media.module';
         synchronize: true, // Be careful in production, but okay for dev
       }),
     }),
+    CoursesModule,
+    LessonsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
+import { CourseService } from '../../../core/services/course.service';
 
 @Component({
   selector: 'app-lesson-list',
@@ -11,7 +12,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
     <div class="p-4 md:p-10 max-w-5xl mx-auto">
       <!-- Course Header -->
       <div class="relative rounded-[3rem] overflow-hidden mb-12 shadow-2xl">
-          <img [src]="course().image" class="w-full h-80 object-cover opacity-80" [alt]="course().title">
+          <img [src]="course().thumbnail" class="w-full h-80 object-cover opacity-80" [alt]="course().title">
           <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
           <div class="absolute bottom-10 left-10 right-10">
             <div class="flex items-center gap-3 mb-4">
@@ -67,7 +68,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
                           </svg>
                       </div>
                     } @else {
-                      <button [routerLink]="['/learner/lesson', lesson.id]" 
+                      <button [routerLink]="['/learner/courses', course().slug, 'lessons', lesson.slug]" 
                               class="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
                         Học ngay
                       </button>
@@ -80,20 +81,21 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
     </div>
   `
 })
-export class LessonListComponent {
-  route = inject(ActivatedRoute);
+export class LessonListComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private courseService = inject(CourseService);
   
-  course = signal({
-    id: 1,
-    title: 'Original English',
-    level: 'Cơ bản',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200',
-    lessons: [
-      { id: 1, title: 'Day Of The Dead', type: 'Video', duration: '5m', completed: true },
-      { id: 2, title: 'A Kiss', type: 'Story', duration: '15m', completed: false },
-      { id: 3, title: "Bubba's food", type: 'Audio', duration: '20m', completed: false },
-      { id: 4, title: 'Changed', type: 'Audio', duration: '18m', completed: false },
-      { id: 5, title: 'Drag', type: 'Quiz', duration: '10m', completed: false },
-    ]
+  course = signal<any>({
+    title: 'Loading...',
+    lessons: []
   });
+
+  ngOnInit() {
+    const slug = this.route.snapshot.paramMap.get('courseSlug');
+    if (slug) {
+      this.courseService.findOneBySlug(slug).subscribe(course => {
+        this.course.set(course);
+      });
+    }
+  }
 }
