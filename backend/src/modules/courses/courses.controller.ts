@@ -22,6 +22,11 @@ export class CoursesController {
     return this.coursesService.create(createCourseDto);
   }
 
+  @Patch('reorder')
+  reorder(@Body() orderData: { id: string; order_index: number }[]) {
+    return this.coursesService.reorder(orderData);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
     return this.coursesService.update(id, updateCourseDto);

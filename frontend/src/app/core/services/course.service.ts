@@ -59,4 +59,8 @@ export class CourseService {
       tap(() => this.findAll().subscribe())
     );
   }
+
+  reorderCourses(orderData: { id: string; order_index: number }[]): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/reorder`, orderData);
+  }
 }

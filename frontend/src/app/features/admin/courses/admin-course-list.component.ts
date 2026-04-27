@@ -1,13 +1,14 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CourseService } from '../../../core/services/course.service';
 import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-admin-course-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, MediaUrlPipe],
+  imports: [CommonModule, RouterModule, MediaUrlPipe, DragDropModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-8 animate-in fade-in duration-700">
@@ -50,6 +51,7 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50/50 dark:bg-white/2 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
+                            <th class="px-8 py-5 w-16"></th>
                             <th class="px-8 py-5">Thumbnail</th>
                             <th class="px-8 py-5">Tiêu đề khóa học</th>
                             <th class="px-8 py-5">Cấp độ</th>
@@ -58,9 +60,16 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                             <th class="px-8 py-5 text-right">Hành động</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-50 dark:divide-white/5">
-                        @for (course of courses(); track course.id) {
-                            <tr class="group hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors">
+                    <tbody cdkDropList (cdkDropListDropped)="onDrop($event)" class="divide-y divide-gray-50 dark:divide-white/5">
+                        @for (course of localCourses(); track course.id) {
+                            <tr cdkDrag class="group hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors cursor-move active:bg-gray-100 dark:active:bg-white/10">
+                                <td class="px-8 py-5">
+                                    <div class="text-gray-300 dark:text-gray-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                        </svg>
+                                    </div>
+                                </td>
                                 <td class="px-8 py-5">
                                     <div class="w-20 h-12 rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/10 group-hover:scale-110 transition-transform duration-500">
                                         <img [src]="course.thumbnail | mediaUrl" class="w-full h-full object-cover" [alt]="course.title">
@@ -105,7 +114,7 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                             </tr>
                         } @empty {
                             <tr>
-                                <td colspan="6" class="px-8 py-20 text-center">
+                                <td colspan="7" class="px-8 py-20 text-center">
                                     <div class="flex flex-col items-center gap-4">
                                         <div class="w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center text-gray-200 dark:text-gray-700">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,19 +135,63 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
   `,
   styles: [`
     :host { display: block; }
+    .cdk-drag-preview {
+      box-sizing: border-box;
+      border-radius: 4px;
+      box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+                  0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                  0 3px 14px 2px rgba(0, 0, 0, 0.12);
+      background: white;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .cdk-drag-placeholder { opacity: 0; }
+    .cdk-drag-animating { transition: transform 250ms cubic-bezier(0, 0, 0.2, 1); }
+    .cdk-drop-list-dragging tr:not(.cdk-drag-placeholder) { transition: transform 250ms cubic-bezier(0, 0, 0.2, 1); }
   `]
 })
 export class AdminCourseListComponent implements OnInit {
   private courseService = inject(CourseService);
-  courses = this.courseService.courses;
+  localCourses = signal<any[]>([]);
 
   ngOnInit() {
-    this.courseService.findAll().subscribe();
+    this.loadCourses();
+  }
+
+  loadCourses() {
+    this.courseService.findAll().subscribe({
+      next: (courses) => {
+        console.log('Courses loaded in Admin:', courses);
+        this.localCourses.set(courses);
+      },
+      error: (err) => console.error('Failed to load courses:', err)
+    });
   }
 
   deleteCourse(course: any) {
     if (confirm(`Bạn có chắc chắn muốn xóa khóa học "${course.title}"? Hành động này không thể hoàn tác.`)) {
-      this.courseService.delete(course.id).subscribe();
+      this.courseService.delete(course.id).subscribe(() => {
+        this.localCourses.update(courses => courses.filter(c => c.id !== course.id));
+      });
     }
+  }
+
+  onDrop(event: CdkDragDrop<any[]>) {
+    const courses = [...this.localCourses()];
+    moveItemInArray(courses, event.previousIndex, event.currentIndex);
+    this.localCourses.set(courses);
+    
+    const orderData = courses.map((course, index) => ({
+      id: course.id,
+      order_index: index + 1
+    }));
+
+    this.courseService.reorderCourses(orderData).subscribe({
+      error: (err) => {
+        console.error('Failed to save order:', err);
+        this.loadCourses(); // Rollback on error
+      }
+    });
   }
 }

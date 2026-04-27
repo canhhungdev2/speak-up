@@ -77,4 +77,11 @@ export class CoursesService {
     const course = await this.findOne(id);
     return this.courseRepository.remove(course);
   }
+
+  async reorder(orderData: { id: string; order_index: number }[]) {
+    const updatePromises = orderData.map((item) =>
+      this.courseRepository.update(item.id, { order_index: item.order_index }),
+    );
+    return Promise.all(updatePromises);
+  }
 }
