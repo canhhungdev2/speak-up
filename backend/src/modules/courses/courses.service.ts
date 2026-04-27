@@ -2,6 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from '../../entities/course.entity';
+import { CreateCourseDto } from './dto/create-course.dto';
+import { UpdateCourseDto } from './dto/update-course.dto';
+import { slugify } from '../../common/utils/slugify';
 
 @Injectable()
 export class CoursesService {
@@ -22,6 +25,19 @@ export class CoursesService {
     }));
   }
 
+  async findOne(id: string) {
+    const course = await this.courseRepository.findOne({
+      where: { id },
+      relations: ['lessons'],
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID "${id}" not found`);
+    }
+
+    return course;
+  }
+
   async findOneBySlug(slug: string) {
     const course = await this.courseRepository.findOne({
       where: { slug },
@@ -33,5 +49,32 @@ export class CoursesService {
     }
 
     return course;
+  }
+
+  async create(createCourseDto: CreateCourseDto) {
+    const course = this.courseRepository.create(createCourseDto);
+    
+    if (!course.slug) {
+      course.slug = slugify(course.title);
+    }
+    
+    return this.courseRepository.save(course);
+  }
+
+  async update(id: string, updateCourseDto: UpdateCourseDto) {
+    const course = await this.findOne(id);
+    
+    Object.assign(course, updateCourseDto);
+    
+    if (updateCourseDto.title && !updateCourseDto.slug) {
+      course.slug = slugify(course.title);
+    }
+    
+    return this.courseRepository.save(course);
+  }
+
+  async remove(id: string) {
+    const course = await this.findOne(id);
+    return this.courseRepository.remove(course);
   }
 }

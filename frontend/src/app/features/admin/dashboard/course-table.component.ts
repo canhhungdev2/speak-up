@@ -1,10 +1,11 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
 
 @Component({
   selector: 'app-course-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MediaUrlPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bg-white dark:bg-[#1e293b] rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
@@ -35,7 +36,7 @@ import { CommonModule } from '@angular/common';
                         <tr class="group hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors">
                             <td class="px-8 py-5">
                                 <div class="w-16 h-10 rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/10 group-hover:scale-110 transition-transform duration-500">
-                                    <img [src]="course.thumbnail" class="w-full h-full object-cover" [alt]="course.title">
+                                    <img [src]="course.thumbnail | mediaUrl" class="w-full h-full object-cover" [alt]="course.title">
                                 </div>
                             </td>
                             <td class="px-8 py-5">

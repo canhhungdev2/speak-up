@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { join, dirname } from 'path';
 import type { Response } from 'express';
 
 @Injectable()
@@ -12,16 +12,43 @@ export class MediaService {
     this.storagePath = this.configService.get<string>('STORAGE_PATH') || 'E:\\Workspace\\MyProject\\Storage\\speak-up-storage';
   }
 
-  serveFile(type: 'audio' | 'vtt', filename: string, res: Response) {
-    const filePath = join(this.storagePath, type, filename);
-
-    if (!existsSync(filePath)) {
-      throw new NotFoundException(`File ${filename} not found in ${type} storage`);
+  async saveCourseThumbnail(courseSlug: string, file: Express.Multer.File): Promise<string> {
+    const relativePath = join('courses', courseSlug, `thumbnail-${Date.now()}${this.getExtension(file.originalname)}`);
+    const fullPath = join(this.storagePath, relativePath);
+    
+    // Ensure directory exists
+    const dir = dirname(fullPath);
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
     }
 
-    const mimeType = this.getMimeType(type, filename);
+    // Save file
+    writeFileSync(fullPath, file.buffer);
+
+    // Return only the relative path to be stored in DB
+    const filename = relativePath.split(/[\\/]/).pop();
+    return `/media/courses/${courseSlug}/thumbnail/${filename}`;
+  }
+
+  private getExtension(filename: string): string {
+    const ext = filename.split('.').pop();
+    return ext ? `.${ext}` : '';
+  }
+
+  /**
+   * Serve a file from the external storage path
+   * @param pathParts - Parts of the path within STORAGE_PATH (e.g. ['courses', 'slug', 'lessons', 'slug', 'audio.mp3'])
+   */
+  serveFileFromPath(pathParts: string[], res: Response) {
+    const filePath = join(this.storagePath, ...pathParts);
+
+    if (!existsSync(filePath)) {
+      throw new NotFoundException(`File ${pathParts.join('/')} not found`);
+    }
+
+    const filename = pathParts[pathParts.length - 1];
+    const mimeType = this.getMimeTypeByExtension(filename);
     
-    // Sử dụng res.sendFile giúp Express tự động xử lý Content-Length, Accept-Ranges, và Caching
     return res.sendFile(filePath, {
       headers: {
         'Content-Type': mimeType,
@@ -29,10 +56,19 @@ export class MediaService {
     });
   }
 
-  getMimeType(type: 'audio' | 'vtt', filename: string): string {
-    if (type === 'vtt') return 'text/vtt';
-    if (filename.endsWith('.mp3')) return 'audio/mpeg';
-    if (filename.endsWith('.wav')) return 'audio/wav';
-    return 'application/octet-stream';
+  getMimeTypeByExtension(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'vtt': return 'text/vtt';
+      case 'mp3': return 'audio/mpeg';
+      case 'wav': return 'audio/wav';
+      case 'jpg':
+      case 'jpeg': return 'image/jpeg';
+      case 'png': return 'image/png';
+      case 'webp': return 'image/webp';
+      case 'gif': return 'image/gif';
+      case 'svg': return 'image/svg+xml';
+      default: return 'application/octet-stream';
+    }
   }
 }

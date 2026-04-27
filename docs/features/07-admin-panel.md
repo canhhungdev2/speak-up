@@ -22,19 +22,26 @@ Sử dụng các thẻ thống kê với hiệu ứng "Glow" (phát sáng) theo 
 - **Tỷ lệ hoàn thành**: Màu Xanh lục (Emerald) - Kèm biểu đồ sparkline.
 - **Doanh thu tháng**: Màu Xanh dương (Blue) - Kèm biểu đồ cột.
 
-### 3. Bảng Quản lý khóa học (Refined Table)
-Bảng dữ liệu được thiết kế lại hoàn toàn:
-- Hiển thị ảnh thumbnail khóa học với hiệu ứng zoom khi hover.
-- Huy hiệu trạng thái (Status Badges) đa dạng màu sắc.
-- Cột hành động với các nút Chỉnh sửa/Xóa có hiệu ứng hover nhanh.
+### 3. Bảng Quản lý khóa học (Courses List)
+- **File**: `frontend/src/app/features/admin/courses/admin-course-list.component.ts`
+- Cung cấp cái nhìn tổng quan về tất cả khóa học.
+- Cho phép tìm kiếm, lọc theo cấp độ và thực hiện các hành động nhanh (Chỉnh sửa, Xóa).
 
-## Cấu trúc Component
-- `StatCardComponent`: Thành phần hiển thị chỉ số với hiệu ứng phát sáng tùy biến.
-- `CourseTableComponent`: Thành phần bảng quản lý dữ liệu chuyên dụng.
+### 4. Trang Chỉnh sửa/Thêm mới (Course Editor)
+- **File**: `frontend/src/app/features/admin/courses/admin-course-edit.component.ts`
+- Thiết kế theo Mockup cao cấp với cấu trúc 2 cột.
+- Tự động sinh Slug từ Tiêu đề.
+- Lựa chọn cấp độ thông qua hệ thống nút bấm đồng bộ.
+- Preview ảnh Thumbnail thời gian thực.
+
+## Media & Storage
+Hệ thống sử dụng cấu trúc lưu trữ phân cấp ngoài dự án (`STORAGE_PATH`):
+- `courses/{slug}/thumbnail.webp`: Ảnh đại diện khóa học.
+- `courses/{slug}/lessons/{lesson_slug}/`: Thư mục chứa media cho từng bài học.
 
 ## TODO / Còn thiếu
 - [ ] Xây dựng chi tiết màn hình Quản lý người dùng (`/admin/users`)
 - [ ] Xây dựng chi tiết màn hình Phân tích (`/admin/analytics`)
 - [ ] Chức năng phân quyền (Role-based Guard) cho route `/admin`
-- [ ] Tích hợp API thật cho toàn bộ các chỉ số thống kê (hiện đang dùng mock cho một số mục)
+- [ ] Tích hợp API Upload tệp tin thực tế thay vì chỉ nhập URL ảnh.
 - [ ] Công cụ VTT Creator (tách transcript thành phụ đề) tích hợp vào màn hình tạo bài học

@@ -2,17 +2,18 @@ import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@ang
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { CourseService } from '../../../core/services/course.service';
+import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
 
 @Component({
   selector: 'app-lesson-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MediaUrlPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="p-4 md:p-10 max-w-5xl mx-auto">
       <!-- Course Header -->
       <div class="relative rounded-[3rem] overflow-hidden mb-12 shadow-2xl">
-          <img [src]="course().thumbnail" class="w-full h-80 object-cover opacity-80" [alt]="course().title">
+          <img [src]="course().thumbnail | mediaUrl" class="w-full h-80 object-cover opacity-80" [alt]="course().title">
           <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
           <div class="absolute bottom-10 left-10 right-10">
             <div class="flex items-center gap-3 mb-4">

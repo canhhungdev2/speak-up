@@ -2,11 +2,12 @@ import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@ang
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CourseService } from '../../../core/services/course.service';
+import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
 
 @Component({
   selector: 'app-course-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MediaUrlPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="p-8 relative">
@@ -34,9 +35,9 @@ import { CourseService } from '../../../core/services/course.service';
               <div class="relative bg-white dark:bg-[#1e293b]/50 border border-gray-100 dark:border-white/5 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden hover:translate-y-[-8px] transition-all duration-500 flex flex-col h-full shadow-sm">
                 <!-- Thumbnail -->
                 <div class="h-56 relative overflow-hidden">
-                  <img [src]="course.thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" [alt]="course.title">
+                  <img [src]="course.thumbnail | mediaUrl" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" [alt]="course.title">
                   <div class="absolute inset-0 bg-gradient-to-t from-gray-900/40 dark:from-[#0f172a] via-transparent to-transparent"></div>
-                  <div class="absolute top-6 left-6 bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/20 px-4 py-1.5 rounded-xl text-xs font-black text-white uppercase tracking-widest">
+                  <div class="absolute bottom-6 left-6 bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/20 px-4 py-1.5 rounded-xl text-xs font-black text-white uppercase tracking-widest">
                       {{ course.level }}
                   </div>
                 </div>
