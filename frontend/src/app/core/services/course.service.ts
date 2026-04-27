@@ -15,12 +15,14 @@ export interface Course {
   enrollment?: number;
 }
 
+import { environment } from '../../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class CourseService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/courses';
+  private apiUrl = `${environment.apiBaseUrl}/courses`;
 
   courses = signal<Course[]>([]);
 
@@ -37,7 +39,7 @@ export class CourseService {
   uploadThumbnail(courseSlug: string, file: File): Observable<string> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<string>(`http://localhost:3000/media/upload/course-thumbnail/${courseSlug}`, formData, {
+    return this.http.post<string>(`${environment.apiBaseUrl}/media/upload/course-thumbnail/${courseSlug}`, formData, {
       responseType: 'text' as 'json'
     });
   }

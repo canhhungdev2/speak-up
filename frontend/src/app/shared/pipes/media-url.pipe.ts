@@ -1,11 +1,12 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 @Pipe({
   name: 'mediaUrl',
   standalone: true
 })
 export class MediaUrlPipe implements PipeTransform {
-  private readonly baseUrl = 'http://localhost:3000';
+  private readonly baseUrl = environment.apiBaseUrl;
 
   transform(value: string | undefined | null): string {
     if (!value) return '';
