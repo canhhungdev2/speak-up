@@ -14,7 +14,6 @@ async function seed() {
   const vocabRepo = app.get<Repository<Vocabulary>>(getRepositoryToken(Vocabulary));
 
   console.log('Cleaning old data...');
-  await vocabRepo.query('TRUNCATE TABLE "user_vocabulary" CASCADE');
   await vocabRepo.query('TRUNCATE TABLE "vocabulary" CASCADE');
   await vocabRepo.query('TRUNCATE TABLE "lessons" CASCADE');
   await vocabRepo.query('TRUNCATE TABLE "courses" CASCADE');

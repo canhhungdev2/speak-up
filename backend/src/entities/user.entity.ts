@@ -11,18 +11,6 @@ export class User {
   @Column({ default: 'learner' })
   role: string;
 
-  @Column({ default: 1 })
-  level: number;
-
-  @Column({ default: 0 })
-  xp: number;
-
-  @Column({ default: 0 })
-  streak: number;
-
-  @Column({ type: 'date', nullable: true })
-  last_active: Date;
-
   @CreateDateColumn()
   created_at: Date;
 }

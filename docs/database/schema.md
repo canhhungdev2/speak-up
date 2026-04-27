@@ -9,10 +9,6 @@ Lưu trữ thông tin chi tiết của người học, mở rộng từ bảng `
 - `id`: Định danh duy nhất (UUID), khớp với ID từ Supabase Auth.
 - `username`: Tên người dùng hiển thị trên hệ thống.
 - `role`: Phân quyền (ví dụ: `learner` cho học viên, `admin` cho quản trị viên).
-- `level`: Cấp độ hiện tại của người học (dựa trên XP).
-- `xp`: Tổng điểm kinh nghiệm tích lũy được qua các bài học.
-- `streak`: Số ngày học tập liên tục.
-- `last_active`: Ngày cuối cùng người dùng có hoạt động.
 - `created_at`: Thời điểm tạo tài khoản.
 
 ```typescript
@@ -21,10 +17,6 @@ export class User {
   @PrimaryColumn('uuid') id: string; 
   @Column() username: string;
   @Column() role: string;           
-  @Column() level: number;
-  @Column() xp: number;
-  @Column() streak: number;
-  @Column() last_active: Date;
   @CreateDateColumn() created_at: Date;
 }
 ```
@@ -105,48 +97,3 @@ export class Vocabulary {
 }
 ```
 
-### `UserVocabulary` (Bảng `user_vocabulary`)
-Lưu trạng thái học tập của từng từ vựng đối với từng người dùng (Dùng cho hệ thống SRS).
-- `user_id`: ID của người học.
-- `vocabulary_id`: ID của từ vựng.
-- `srs_level`: Mức độ ghi nhớ (thường từ 0-5).
-- `ease_factor`: Hệ số độ dễ (theo thuật toán SM-2), dùng để tính ngày ôn tiếp theo.
-- `interval`: Khoảng thời gian (số ngày) cho lần ôn tập tới.
-- `next_review`: Ngày dự kiến người học cần ôn lại từ này.
-- `last_reviewed`: Thời điểm cuối cùng người học thực hiện ôn từ này.
-
-```typescript
-@Entity('user_vocabulary')
-@Unique(['user_id', 'vocabulary_id'])
-export class UserVocabulary {
-  @PrimaryGeneratedColumn() id: number;
-  @Column() user_id: string;
-  @Column() vocabulary_id: number;
-  @Column() srs_level: number;      
-  @Column() ease_factor: number;    
-  @Column() interval: number;       
-  @Column() next_review: Date;
-  @Column() last_reviewed: Date;
-}
-```
-
-## Thuật toán SRS (SM-2)
-
-Logic này được triển khai trong Service khi xử lý đánh giá từ vựng:
-
-```typescript
-// rating: 0=again, 1=hard, 2=good, 3=easy
-function calculateNextReview(card: UserVocabulary, rating: number) {
-  if (rating === 0) {
-    return { interval: 1, easeFactor: card.ease_factor - 0.2 };
-  }
-
-  const newEase = card.ease_factor + (0.1 - (3 - rating) * 0.08);
-  const newInterval = Math.ceil(card.interval * Math.max(1.3, newEase));
-
-  return {
-    interval: newInterval,
-    easeFactor: Math.max(1.3, newEase)
-  };
-}
-```

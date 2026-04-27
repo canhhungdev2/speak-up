@@ -7,8 +7,6 @@ import { User } from './entities/user.entity';
 import { Course } from './entities/course.entity';
 import { Lesson } from './entities/lesson.entity';
 import { Vocabulary } from './entities/vocabulary.entity';
-import { UserVocabulary } from './entities/user-vocabulary.entity';
-import { UserProgress } from './entities/user-progress.entity';
 import { MediaModule } from './modules/media/media.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { LessonsModule } from './modules/lessons/lessons.module';
@@ -30,8 +28,6 @@ import { LessonsModule } from './modules/lessons/lessons.module';
           Course,
           Lesson,
           Vocabulary,
-          UserVocabulary,
-          UserProgress,
         ],
         synchronize: true, // Be careful in production, but okay for dev
       }),
