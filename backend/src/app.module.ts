@@ -9,9 +9,11 @@ import { Lesson } from './entities/lesson.entity';
 import { Vocabulary } from './entities/vocabulary.entity';
 import { UserVocabulary } from './entities/user-vocabulary.entity';
 import { UserProgress } from './entities/user-progress.entity';
+import { MediaModule } from './modules/media/media.module';
 
 @Module({
   imports: [
+    MediaModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
