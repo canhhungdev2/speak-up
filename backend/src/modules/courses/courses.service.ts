@@ -11,9 +11,15 @@ export class CoursesService {
   ) {}
 
   async findAll() {
-    return this.courseRepository.find({
+    const courses = await this.courseRepository.find({
+      relations: ['lessons'],
       order: { order_index: 'ASC' },
     });
+
+    return courses.map(course => ({
+      ...course,
+      lessons_count: course.lessons?.length || 0,
+    }));
   }
 
   async findOneBySlug(slug: string) {

@@ -41,7 +41,7 @@ import { CourseService } from '../../../core/services/course.service';
               <div class="relative bg-white dark:bg-[#1e293b] p-6 rounded-3xl border border-gray-100 dark:border-white/5 flex items-center gap-6 hover:shadow-xl transition-all cursor-pointer">
                   <!-- Lesson Number -->
                   <div class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-xl font-black text-gray-400 group-hover:text-primary transition-colors">
-                    {{ lesson.id }}
+                    {{ lesson.order_index }}
                   </div>
 
                   <!-- Lesson Info -->
