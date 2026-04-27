@@ -5,11 +5,11 @@ import { Vocabulary } from './vocabulary.entity';
 
 @Entity('lessons')
 export class Lesson {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column()
-  course_id: number;
+  @Column('uuid')
+  course_id: string;
 
   @ManyToOne(() => Course, (course) => course.lessons)
   @JoinColumn({ name: 'course_id' })

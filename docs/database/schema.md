@@ -34,7 +34,7 @@ Chứa thông tin về các khóa học tiếng Anh.
 ```typescript
 @Entity('courses')
 export class Course {
-  @PrimaryGeneratedColumn() id: number;
+  @PrimaryGeneratedColumn('uuid') id: string;
   @Column() title: string;
   @Column() description: string;
   @Column() level: string;          
@@ -59,8 +59,8 @@ Lưu trữ các bài học thuộc một khóa học.
 ```typescript
 @Entity('lessons')
 export class Lesson {
-  @PrimaryGeneratedColumn() id: number;
-  @Column() course_id: number;
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column('uuid') course_id: string;
   @ManyToOne(() => Course) course: Course;
   @Column() title: string;
   @Column() type: string;           
@@ -85,8 +85,8 @@ Lưu trữ kho từ vựng đi kèm theo từng bài học.
 ```typescript
 @Entity('vocabulary')
 export class Vocabulary {
-  @PrimaryGeneratedColumn() id: number;
-  @Column() lesson_id: number;
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column('uuid') lesson_id: string;
   @ManyToOne(() => Lesson) lesson: Lesson;
   @Column() term: string;
   @Column() ipa: string;

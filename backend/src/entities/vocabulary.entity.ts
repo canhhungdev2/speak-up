@@ -3,11 +3,11 @@ import { Lesson } from './lesson.entity';
 
 @Entity('vocabulary')
 export class Vocabulary {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column()
-  lesson_id: number;
+  @Column('uuid')
+  lesson_id: string;
 
   @ManyToOne(() => Lesson, (lesson) => lesson.vocabularies)
   @JoinColumn({ name: 'lesson_id' })
