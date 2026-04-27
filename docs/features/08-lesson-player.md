@@ -42,9 +42,20 @@ Cách tiếp cận này giúp:
 2. Dễ dàng mở rộng (ví dụ: thêm cột tiếng Nhật, tiếng Pháp) mà không cần đổi schema.
 3. Tải dữ liệu nhanh trong một lần gọi API.
 
+### 4. Mini Stories & Highlight đồng bộ
+- **Dữ liệu**: Mỗi mini story bao gồm một file audio (`.mp3`) và một file phụ đề (`.vtt`).
+- **Media Streaming**: Audio và phụ đề được truyền phát (stream) trực tiếp từ bộ lưu trữ ngoài dự án thông qua Media API (`/media/:type/:filename`).
+- **Highlight**: Ứng dụng giải mã file VTT để lấy các mốc thời gian và tự động highlight câu văn tương ứng khi audio phát đến.
+- **Tương tác**: Click vào câu văn để nhảy nhanh đến đoạn âm thanh đó.
+
+## Dữ liệu & Lưu trữ
+... (giữ nguyên các phần cũ) ...
+
 ## TODO / Còn thiếu
-- [ ] Tích hợp `HTML Audio Element` thật để phát file từ `audioUrl`.
-- [ ] Đồng bộ thanh tiến trình với thời gian phát audio thực tế.
+- [x] Tích hợp `HTML Audio Element` thật để phát file từ `audioUrl`.
+- [x] Đồng bộ thanh tiến trình với thời gian phát audio thực tế.
+- [x] Tính năng highlight đồng bộ cho Mini Story sử dụng file WebVTT.
+- [x] Hệ thống Media Streaming API để phục vụ file từ bộ lưu trữ ngoài.
 - [ ] Chức năng highlight từ vựng khi click vào các từ in đậm trong bài đọc.
 - [ ] Lưu tiến độ hoàn thành từng phần của bài học vào database.
 - [ ] Tự động chuyển phần tiếp theo khi audio kết thúc.

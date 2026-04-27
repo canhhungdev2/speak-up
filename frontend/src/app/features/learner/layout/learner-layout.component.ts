@@ -46,7 +46,7 @@ import { SidebarService } from '../../../core/services/sidebar.service';
           <div>
             <p *ngIf="!sidebarService.isSlim()" class="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6 px-4 animate-in fade-in duration-500">Menu Chính</p>
             <nav class="space-y-2">
-              <a routerLink="/learner" routerLinkActive="bg-primary/10 text-primary dark:bg-primary/20" [routerLinkActiveOptions]="{exact: true}"
+              <a routerLink="/learner/dashboard" routerLinkActive="bg-primary/10 text-primary dark:bg-primary/20"
                  [title]="sidebarService.isSlim() ? 'Dashboard' : ''"
                  class="flex items-center gap-4 px-4 py-3.5 text-gray-500 dark:text-slate-400 font-bold rounded-2xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
                  [class.justify-center]="sidebarService.isSlim()">

@@ -1,9 +1,24 @@
 import {
   Component, ChangeDetectionStrategy, signal, computed,
-  inject
+  inject, effect
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { MediaService } from '../../../core/services/media.service';
+
+interface StorySentence {
+  text: string;
+  startTime: number;
+  endTime: number;
+}
+
+interface MiniStory {
+  id: string;
+  title: string;
+  audioUrl: string;
+  vttUrl?: string; // URL của file phụ đề
+  sentences: StorySentence[];
+}
 
 interface LessonSection {
   id: string;
@@ -14,7 +29,7 @@ interface LessonSection {
   content?: string;
   paragraphs?: { en: string; vi: string; }[];
   vocabList?: { term: string; definition: string; }[];
-  stories?: { id: string; title: string; transcript: string; audioUrl: string; }[];
+  stories?: MiniStory[];
 }
 
 @Component({
@@ -159,21 +174,31 @@ interface LessonSection {
                       <!-- Story Tabs -->
                       <div class="flex gap-2 p-1.5 bg-gray-100 dark:bg-white/5 rounded-2xl w-full md:w-fit overflow-x-auto scrollbar-hide">
                         @for (story of activeSection().stories; track story.id; let i = $index) {
-                            <button (click)="activeStoryIndex.set(i)"
+                            <button (click)="setActiveStory(i)"
                                     [class.bg-white]="activeStoryIndex() === i"
                                     [class.dark:bg-white/10]="activeStoryIndex() === i"
                                     [class.shadow-sm]="activeStoryIndex() === i"
                                     class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all text-gray-500 dark:text-slate-400 whitespace-nowrap"
                                     [class.text-primary]="activeStoryIndex() === i">
-                              Story {{ i + 1 }}
+                                Story {{ i + 1 }}
                             </button>
                         }
                       </div>
 
-                      <div class="bg-white dark:bg-white/5 p-6 md:p-12 rounded-[2.5rem] md:rounded-[3rem] border border-gray-100 dark:border-white/10 relative overflow-hidden">
-                        <p class="text-xl md:text-2xl font-medium text-gray-700 dark:text-slate-300 leading-loose italic">
-                            {{ activeSection().stories?.[activeStoryIndex()]?.transcript }}
-                        </p>
+                      <div class="bg-white dark:bg-white/5 p-8 md:p-14 rounded-[2.5rem] md:rounded-[3rem] border border-gray-100 dark:border-white/10 relative overflow-hidden shadow-sm">
+                        <div class="flex flex-wrap gap-x-2 gap-y-3">
+                          @for (s of currentStory()?.sentences; track $index) {
+                            <span [id]="'sentence-' + $index"
+                                  (click)="seekAudio(s.startTime)"
+                                  [class.bg-primary/20]="currentSentenceIndex() === $index"
+                                  [class.text-primary-dark]="currentSentenceIndex() === $index"
+                                  [class.dark:text-primary-light]="currentSentenceIndex() === $index"
+                                  [class.scale-[1.02]]="currentSentenceIndex() === $index"
+                                  class="text-xl md:text-3xl font-medium text-gray-700 dark:text-slate-300 leading-relaxed cursor-pointer transition-all duration-300 hover:text-primary rounded-lg px-1 py-0.5">
+                                {{ s.text }}
+                            </span>
+                          }
+                        </div>
                       </div>
                   </div>
                 }
@@ -240,11 +265,13 @@ interface LessonSection {
                 
                 <!-- Progress Bar -->
                 <div class="flex items-center gap-3 md:gap-4">
-                  <span class="text-[9px] md:text-[10px] font-bold text-gray-400 tabular-nums w-7 md:w-8">1:24</span>
-                  <div class="flex-grow h-1 md:h-1.5 bg-gray-100 dark:bg-white/10 rounded-full relative overflow-hidden group cursor-pointer">
-                      <div class="h-full bg-primary w-[40%] rounded-full relative"></div>
+                  <span class="text-[9px] md:text-[10px] font-bold text-gray-400 tabular-nums w-7 md:w-10">{{ formatTime(currentTime()) }}</span>
+                  <div class="flex-grow h-1 md:h-1.5 bg-gray-100 dark:bg-white/10 rounded-full relative overflow-hidden group cursor-pointer"
+                       (click)="onProgressBarClick($event)">
+                      <div class="h-full bg-primary rounded-full relative transition-all duration-100"
+                           [style.width.%]="progress()"></div>
                   </div>
-                  <span class="text-[9px] md:text-[10px] font-bold text-gray-400 tabular-nums w-7 md:w-8">4:30</span>
+                  <span class="text-[9px] md:text-[10px] font-bold text-gray-400 tabular-nums w-7 md:w-10">{{ formatTime(duration()) }}</span>
                 </div>
             </div>
 
@@ -273,12 +300,23 @@ interface LessonSection {
 export class LessonPlayerComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private mediaService = inject(MediaService);
 
   lessonTitle = signal('The Power of Persistence');
   isSectionMenuOpen = signal(false);
   activeStoryIndex = signal(0);
   isPlaying = signal(false);
+  currentTime = signal(0);
+  duration = signal(0);
   playbackSpeed = signal(1);
+
+  progress = computed(() => {
+    const d = this.duration();
+    if (d === 0) return 0;
+    return (this.currentTime() / d) * 100;
+  });
+
+  private audio = new Audio();
 
   sections = signal<LessonSection[]>([
     {
@@ -342,13 +380,22 @@ export class LessonPlayerComponent {
           id: 's1', 
           title: 'The Persistent Turtle', 
           audioUrl: 'story1.mp3',
-          transcript: 'There was a turtle named Toby. Toby wanted to climb a mountain. All the other animals laughed at him. "You are too slow," they said. But Toby was persistent. He moved one inch at a time. Every day, he kept going. Finally, after many months, he reached the top!'
+          vttUrl: 'story1.vtt',
+          sentences: [] // Sẽ được load từ VTT
         },
         { 
           id: 's2', 
           title: 'The Golden Goal', 
           audioUrl: 'story2.mp3',
-          transcript: 'In another part of the forest, a rabbit was trying to find a golden carrot. He ran very fast but got tired easily. When he faced a river, he gave up. But the turtle, who was behind him, found a way to swim across because he didn\'t stop thinking about the goal.'
+          vttUrl: 'story2.vtt',
+          sentences: []
+        },
+        { 
+          id: 's3', 
+          title: 'The Weaver of Stars (Long Text)', 
+          audioUrl: 'story3.mp3',
+          vttUrl: 'story3.vtt',
+          sentences: []
         }
       ]
     },
@@ -373,21 +420,136 @@ export class LessonPlayerComponent {
   activeSection = signal<LessonSection>(this.sections()[0]);
   completedSections = signal<Set<string>>(new Set());
 
+  currentStory = computed(() => {
+    const section = this.activeSection();
+    if (section.type === 'story' && section.stories) {
+      return section.stories[this.activeStoryIndex()];
+    }
+    return null;
+  });
+
+  currentSentenceIndex = computed(() => {
+    const story = this.currentStory();
+    if (!story) return -1;
+    const time = this.currentTime();
+    return story.sentences.findIndex(s => time >= s.startTime && time < s.endTime);
+  });
+
+  constructor() {
+    this.audio.addEventListener('timeupdate', () => {
+      this.currentTime.set(this.audio.currentTime);
+    });
+    this.audio.addEventListener('durationchange', () => {
+      if (this.audio.duration && !isNaN(this.audio.duration)) {
+        this.duration.set(this.audio.duration);
+      }
+    });
+    this.audio.addEventListener('loadedmetadata', () => {
+      if (this.audio.duration && !isNaN(this.audio.duration)) {
+        this.duration.set(this.audio.duration);
+      }
+    });
+    this.audio.addEventListener('ended', () => {
+      this.isPlaying.set(false);
+    });
+    
+    // Auto-load audio for the first section
+    this.updateAudioSource();
+
+    // Auto-scroll effect
+    effect(() => {
+      const index = this.currentSentenceIndex();
+      if (index >= 0) {
+        const element = document.getElementById(`sentence-${index}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    });
+  }
+
   setActiveSection(section: LessonSection) {
     this.activeSection.set(section);
     this.activeStoryIndex.set(0);
-    // Logic to load new audio would go here
+    this.updateAudioSource();
+  }
+
+  setActiveStory(index: number) {
+    this.activeStoryIndex.set(index);
+    this.updateAudioSource();
+  }
+
+  private updateAudioSource() {
+    const section = this.activeSection();
+    let audioFilename = section.audioUrl;
+    let vttFilename = '';
+
+    if (section.type === 'story' && section.stories) {
+      const story = section.stories[this.activeStoryIndex()];
+      audioFilename = story.audioUrl;
+      vttFilename = story.vttUrl || '';
+    }
+
+    if (audioFilename) {
+      this.audio.src = this.mediaService.getMediaUrl('audio', audioFilename);
+      this.audio.load();
+      if (this.isPlaying()) {
+        this.audio.play();
+      }
+    }
+
+    if (vttFilename) {
+      this.mediaService.fetchAndParseVtt(vttFilename).subscribe(sentences => {
+        const section = this.activeSection();
+        if (section.stories) {
+          section.stories[this.activeStoryIndex()].sentences = sentences;
+          // Trigger signal update if necessary (sections is a signal)
+          this.sections.update(s => [...s]);
+        }
+      });
+    }
   }
 
   togglePlay() {
-    this.isPlaying.update(v => !v);
+    if (this.isPlaying()) {
+      this.audio.pause();
+    } else {
+      this.audio.play();
+    }
+    this.isPlaying.set(!this.isPlaying());
+  }
+
+  seekAudio(time: number) {
+    this.audio.currentTime = time;
+    this.currentTime.set(time);
+    if (!this.isPlaying()) {
+      this.togglePlay();
+    }
+  }
+
+  onProgressBarClick(event: MouseEvent) {
+    const el = event.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const percentage = x / rect.width;
+    const time = percentage * this.duration();
+    this.seekAudio(time);
   }
 
   cyclePlaybackSpeed() {
     const speeds = [1, 1.25, 1.5, 2, 0.75];
     const current = this.playbackSpeed();
     const nextIndex = (speeds.indexOf(current) + 1) % speeds.length;
-    this.playbackSpeed.set(speeds[nextIndex]);
+    const nextSpeed = speeds[nextIndex];
+    this.playbackSpeed.set(nextSpeed);
+    this.audio.playbackRate = nextSpeed;
+  }
+
+  formatTime(seconds: number): string {
+    if (isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
   isCompleted(id: string) {
