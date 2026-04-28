@@ -85,9 +85,9 @@ interface LessonSection {
 
             @switch (activeSection().type) {
                 @case ('article') {
-                  <div class="space-y-12">
+                  <div class="space-y-8">
                       @for (p of activeSection().paragraphs; track p.en) {
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-20 group">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 group border-b border-gray-100/50 dark:border-white/5 pb-8 last:border-0">
                             <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-800 dark:text-slate-200 leading-relaxed tracking-tight" [innerHTML]="p.en"></div>
                             <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-500/80 dark:text-slate-400/80 italic border-l-2 border-gray-100 pl-8" [innerHTML]="p.vi"></div>
                         </div>
