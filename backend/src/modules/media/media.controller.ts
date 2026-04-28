@@ -25,6 +25,16 @@ export class MediaController {
   ) {
     return this.mediaService.saveCourseThumbnail(courseSlug, file);
   }
+  
+  @Post('upload/lesson-media/:courseSlug/:lessonSlug')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadLessonMedia(
+    @Param('courseSlug') courseSlug: string,
+    @Param('lessonSlug') lessonSlug: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.mediaService.saveLessonMedia(courseSlug, lessonSlug, file);
+  }
 
   @Get('courses/:courseSlug/lessons/:lessonSlug/:filename')
   serveLessonMedia(

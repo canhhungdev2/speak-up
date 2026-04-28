@@ -31,6 +31,24 @@ export class MediaService {
     return `/media/courses/${courseSlug}/thumbnail/${filename}`;
   }
 
+  async saveLessonMedia(courseSlug: string, lessonSlug: string, file: Express.Multer.File): Promise<string> {
+    const filename = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
+    const relativePath = join('courses', courseSlug, 'lessons', lessonSlug, filename);
+    const fullPath = join(this.storagePath, relativePath);
+    
+    // Ensure directory exists
+    const dir = dirname(fullPath);
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+
+    // Save file
+    writeFileSync(fullPath, file.buffer);
+
+    // Return the URL format the client expects
+    return `/media/courses/${courseSlug}/lessons/${lessonSlug}/${filename}`;
+  }
+
   private getExtension(filename: string): string {
     const ext = filename.split('.').pop();
     return ext ? `.${ext}` : '';
