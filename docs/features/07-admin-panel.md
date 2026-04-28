@@ -23,16 +23,21 @@ Sử dụng các thẻ thống kê với hiệu ứng "Glow" (phát sáng) theo 
 - **Doanh thu tháng**: Màu Xanh dương (Blue) - Kèm biểu đồ cột.
 
 ### 3. Bảng Quản lý khóa học (Courses List)
-- **File**: `frontend/src/app/features/admin/courses/admin-course-list.component.ts`
-- Cung cấp cái nhìn tổng quan về tất cả khóa học.
-- Cho phép tìm kiếm, lọc theo cấp độ và thực hiện các hành động nhanh (Chỉnh sửa, Xóa).
+- Cho phép tìm kiếm, lọc theo cấp độ và thực hiện các hành động nhanh: Chỉnh sửa, Xóa, và **Quản lý bài học**.
+- **Quản lý bài học**: Nút biểu tượng "Quyển sách" (màu Emerald) chuyển hướng đến danh sách bài học của khóa học đó.
 
-### 4. Trang Chỉnh sửa/Thêm mới (Course Editor)
-- **File**: `frontend/src/app/features/admin/courses/admin-course-edit.component.ts`
-- Thiết kế theo Mockup cao cấp với cấu trúc 2 cột.
-- Tự động sinh Slug từ Tiêu đề.
-- Lựa chọn cấp độ thông qua hệ thống nút bấm đồng bộ.
-- Preview ảnh Thumbnail thời gian thực.
+### 4. Quản lý danh sách bài học (Lessons List)
+- **File**: `frontend/src/app/features/admin/lessons/admin-lesson-list.component.ts`
+- **URL**: `/admin/courses/:courseSlug/lessons`
+- Hiển thị danh sách bài học theo thứ tự.
+- **Kéo thả (Drag & Drop)**: Sử dụng Angular CDK để thay đổi thứ tự học tập trực quan.
+- Tự động cập nhật `order_index` vào database.
+
+### 5. Trang Chỉnh sửa bài học (Lesson Editor)
+- **File**: `frontend/src/app/features/admin/lessons/admin-lesson-edit.component.ts`
+- **URL**: `/admin/courses/:courseSlug/lessons/edit/:lessonSlug`
+- Hỗ trợ đầy đủ thông tin: Tiêu đề, Loại (Video/Audio/Story/Quiz), Content URL, Thời lượng.
+- **Trình soạn thảo song ngữ (Bilingual Editor)**: Quản lý mảng nội dung Anh - Việt theo dạng thẻ, dễ dàng thêm/bớt và chỉnh sửa lời thoại.
 
 ## Media & Storage
 Hệ thống sử dụng cấu trúc lưu trữ phân cấp ngoài dự án (`STORAGE_PATH`):
@@ -44,4 +49,5 @@ Hệ thống sử dụng cấu trúc lưu trữ phân cấp ngoài dự án (`ST
 - [ ] Xây dựng chi tiết màn hình Phân tích (`/admin/analytics`)
 - [ ] Chức năng phân quyền (Role-based Guard) cho route `/admin`
 - [ ] Tích hợp API Upload tệp tin thực tế thay vì chỉ nhập URL ảnh.
-- [ ] Công cụ VTT Creator (tách transcript thành phụ đề) tích hợp vào màn hình tạo bài học
+- [x] Trình soạn thảo nội dung song ngữ (Bilingual Editor) cho bài học
+- [ ] Công cụ VTT Creator (tách transcript thành phụ đề tự động)

@@ -39,5 +39,5 @@ docs/
 | Lesson List | ✅ UI hoàn chỉnh | Dữ liệu tĩnh |
 | My Vocabulary | ✅ UI hoàn chỉnh | Dữ liệu tĩnh |
 | SRS Study (Flashcard) | ✅ Hoàn thiện UI | Đã thêm animation & TTS cao cấp |
-| Admin Panel | 🚧 Đang xây dựng | Đã có Dashboard & Layout |
+| Admin Panel | ✅ Cơ bản hoàn thiện | Đã có Dashboard, Quản lý khóa học & bài học (Drag & Drop) |
 | Lesson Player | ✅ Hoàn thiện UI | Giao diện song ngữ Anh - Việt |
