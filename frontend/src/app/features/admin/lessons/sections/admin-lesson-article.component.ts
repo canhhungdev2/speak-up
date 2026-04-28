@@ -51,6 +51,7 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
                 formControlName="main_audio_url"
                 [courseSlug]="courseSlug"
                 [lessonSlug]="lessonSlug"
+                [customName]="'MainArticle'"
               ></app-admin-audio-upload>
             </div>
           </div>
@@ -143,8 +144,10 @@ export class AdminLessonArticleComponent implements OnInit {
   private lessonEditService = inject(LessonEditService);
   
   loading = this.lessonEditService.loading;
-  courseSlug = this.route.snapshot.paramMap.get('courseSlug') || '';
-  lessonSlug = this.route.snapshot.paramMap.get('lessonSlug') || '';
+  
+  // Slugs are defined on the parent route (AdminLessonEditComponent)
+  get courseSlug() { return this.route.parent?.snapshot.paramMap.get('courseSlug') || ''; }
+  get lessonSlug() { return this.route.parent?.snapshot.paramMap.get('lessonSlug') || ''; }
 
   @ViewChild('editorEn') editorEn!: RichTextEditorComponent;
   @ViewChild('editorVi') editorVi!: RichTextEditorComponent;

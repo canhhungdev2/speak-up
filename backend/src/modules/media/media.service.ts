@@ -13,7 +13,7 @@ export class MediaService {
     this.storagePath = this.configService.get<string>('STORAGE_PATH') || 'E:\\Workspace\\MyProject\\Storage\\speak-up-storage';
   }
 
-  async saveCourseThumbnail(courseSlug: string, file: Express.Multer.File): Promise<string> {
+  async saveCourseThumbnail(courseSlug: string, file: Express.Multer.File): Promise<{ url: string }> {
     const relativePath = join('courses', courseSlug, `thumbnail-${Date.now()}${this.getExtension(file.originalname)}`);
     const fullPath = join(this.storagePath, relativePath);
     
@@ -28,11 +28,17 @@ export class MediaService {
 
     // Return only the relative path to be stored in DB
     const filename = relativePath.split(/[\\/]/).pop();
-    return `/media/courses/${courseSlug}/thumbnail/${filename}`;
+    return {
+      url: `/media/courses/${courseSlug}/thumbnail/${filename}`
+    };
   }
 
-  async saveLessonMedia(courseSlug: string, lessonSlug: string, file: Express.Multer.File): Promise<string> {
-    const filename = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
+  async saveLessonMedia(courseSlug: string, lessonSlug: string, file: Express.Multer.File, customName?: string): Promise<{ url: string }> {
+    const extension = this.getExtension(file.originalname);
+    const filename = customName 
+      ? `${customName}${extension}`
+      : `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
+    
     const relativePath = join('courses', courseSlug, 'lessons', lessonSlug, filename);
     const fullPath = join(this.storagePath, relativePath);
     
@@ -45,8 +51,10 @@ export class MediaService {
     // Save file
     writeFileSync(fullPath, file.buffer);
 
-    // Return the URL format the client expects
-    return `/media/courses/${courseSlug}/lessons/${lessonSlug}/${filename}`;
+    // Return the URL format the client expects as an object
+    return {
+      url: `/media/courses/${courseSlug}/lessons/${lessonSlug}/${filename}`
+    };
   }
 
   private getExtension(filename: string): string {

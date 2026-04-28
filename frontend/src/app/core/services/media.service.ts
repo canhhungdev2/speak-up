@@ -22,10 +22,14 @@ export class MediaService {
     );
   }
 
-  uploadLessonMedia(courseSlug: string, lessonSlug: string, file: File): Observable<any> {
+  uploadLessonMedia(courseSlug: string, lessonSlug: string, file: File, customName?: string): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post(`${this.baseUrl}/upload/lesson-media/${courseSlug}/${lessonSlug}`, formData, {
+    let url = `${this.baseUrl}/upload/lesson-media/${courseSlug}/${lessonSlug}`;
+    if (customName) {
+      url += `?customName=${customName}`;
+    }
+    return this.http.post(url, formData, {
       reportProgress: true,
       observe: 'events'
     });

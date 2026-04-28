@@ -89,6 +89,7 @@ import { environment } from '../../../environments/environment';
 export class AdminAudioUploadComponent implements ControlValueAccessor {
   @Input() courseSlug: string = '';
   @Input() lessonSlug: string = '';
+  @Input() customName: string = '';
 
   private mediaService = inject(MediaService);
   
@@ -141,13 +142,13 @@ export class AdminAudioUploadComponent implements ControlValueAccessor {
     this.isUploading.set(true);
     this.uploadProgress.set(0);
 
-    this.mediaService.uploadLessonMedia(this.courseSlug, this.lessonSlug, file).subscribe({
+    this.mediaService.uploadLessonMedia(this.courseSlug, this.lessonSlug, file, this.customName).subscribe({
       next: (event: any) => {
         if (event.type === HttpEventType.UploadProgress) {
           this.uploadProgress.set(Math.round(100 * event.loaded / event.total));
         } else if (event.type === HttpEventType.Response) {
           this.isUploading.set(false);
-          this.value = event.body; // Path returned from server
+          this.value = event.body.url; // Extract URL from object
           this.onChange(this.value);
         }
       },

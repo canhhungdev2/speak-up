@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Param, Res, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import 'multer';
 import { MediaService } from './media.service';
@@ -31,9 +31,10 @@ export class MediaController {
   uploadLessonMedia(
     @Param('courseSlug') courseSlug: string,
     @Param('lessonSlug') lessonSlug: string,
+    @Query('customName') customName: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.mediaService.saveLessonMedia(courseSlug, lessonSlug, file);
+    return this.mediaService.saveLessonMedia(courseSlug, lessonSlug, file, customName);
   }
 
   @Get('courses/:courseSlug/lessons/:lessonSlug/:filename')
