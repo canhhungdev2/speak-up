@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { LessonEditService } from '../lesson-edit.service';
 import { VocabularyService, Vocabulary } from '../../../../core/services/vocabulary.service';
+import { DictionaryService } from '../../../../core/services/dictionary.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AdminAudioUploadComponent } from '../../../../shared/components/admin-audio-upload.component';
 
@@ -36,7 +37,7 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
               [customName]="'Vocabulary'"
               (uploadSuccess)="onAudioUpload($event)"
             ></app-admin-audio-upload>
-    </div>
+          </div>
         </div>
 
         <!-- Vocabulary List -->
@@ -57,75 +58,136 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
             </button>
           </div>
 
-          <!-- Add/Edit Form Overlay -->
+          <!-- Modern Modal Overlay -->
           @if (showForm()) {
-            <div class="mb-8 p-8 bg-gray-50 dark:bg-white/2 rounded-[2rem] border-2 border-primary/20 animate-in zoom-in-95 duration-300">
-              <h4 class="text-sm font-black uppercase tracking-widest mb-6 text-primary">
-                {{ editingVocab() ? 'Chỉnh sửa từ vựng' : 'Thêm từ vựng mới' }}
-              </h4>
-              <form [formGroup]="wordForm" (ngSubmit)="onWordSubmit()" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div class="space-y-2">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Từ vựng</label>
-                    <input type="text" formControlName="term" class="w-full bg-white dark:bg-white/5 border-none rounded-xl p-4 text-sm font-bold">
-                  </div>
-                  <div class="space-y-2">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Phiên âm (IPA)</label>
-                    <input type="text" formControlName="ipa" class="w-full bg-white dark:bg-white/5 border-none rounded-xl p-4 text-sm">
-                  </div>
-                  <div class="space-y-2">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Loại từ</label>
-                    <select formControlName="word_type" class="w-full bg-white dark:bg-white/5 border-none rounded-xl p-4 text-sm appearance-none">
-                      <option value="noun">Danh từ (n)</option>
-                      <option value="verb">Động từ (v)</option>
-                      <option value="adj">Tính từ (adj)</option>
-                      <option value="adv">Trạng từ (adv)</option>
-                      <option value="phrase">Cụm từ (phrase)</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="space-y-2">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Định nghĩa</label>
-                    <textarea formControlName="definition" rows="2" class="w-full bg-white dark:bg-white/5 border-none rounded-xl p-4 text-sm"></textarea>
-                  </div>
-                  <div class="space-y-2">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Ví dụ</label>
-                    <textarea formControlName="example" rows="2" class="w-full bg-white dark:bg-white/5 border-none rounded-xl p-4 text-sm"></textarea>
-                  </div>
-                </div>
-                <div class="flex justify-end gap-3 pt-4">
-                  <button type="button" (click)="closeForm()" class="px-6 py-3 text-gray-500 font-bold text-xs uppercase">Hủy bỏ</button>
-                  <button type="submit" [disabled]="wordForm.invalid" 
-                          class="px-8 py-3 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20">
-                    {{ editingVocab() ? 'Cập nhật' : 'Xác nhận thêm' }}
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+              <div class="bg-white dark:bg-[#0f172a] w-full max-w-xl rounded-[2.5rem] shadow-2xl shadow-black/50 overflow-hidden animate-in zoom-in-95 duration-300 border border-white/10">
+                <!-- Modal Header -->
+                <div class="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
+                  <h3 class="text-xl font-black text-gray-900 dark:text-white">
+                    {{ editingVocab() ? 'Edit Word' : 'Add New Word' }}
+                  </h3>
+                  <button (click)="closeForm()" class="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
-              </form>
+
+                <form [formGroup]="wordForm" (ngSubmit)="onWordSubmit()" class="p-8 space-y-6">
+                  <!-- Word / Phrase Row -->
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Word / Phrase</label>
+                      <button type="button" (click)="fetchDetails()" [disabled]="isFetching()"
+                              class="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-black border border-emerald-100 dark:border-emerald-500/20 hover:scale-105 transition-all">
+                        @if (isFetching()) {
+                          <div class="w-3 h-3 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+                        } @else {
+                          <span>✨ Auto Fetch Info</span>
+                        }
+                      </button>
+                    </div>
+                    <input type="text" formControlName="term" placeholder="Enter word or phrase"
+                           class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all outline-none">
+                  </div>
+
+                  <!-- Phonetic & Word Type Row -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                      <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Phonetic</label>
+                      <input type="text" formControlName="ipa" placeholder="/ɡreɪv/"
+                             [class.ring-2]="isAutoFilled()" [class.ring-emerald-500/30]="isAutoFilled()"
+                             class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-primary/20 transition-all outline-none">
+                    </div>
+                    <div class="space-y-2">
+                      <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Word Type</label>
+                      <input type="text" formControlName="word_type" placeholder="noun, verb..."
+                             [class.ring-2]="isAutoFilled()" [class.ring-emerald-500/30]="isAutoFilled()"
+                             class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-primary/20 transition-all outline-none">
+                    </div>
+                  </div>
+
+                  <!-- Audio URL Row (Full Width) -->
+                  <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Audio URL</label>
+                    <div class="relative flex items-center gap-2">
+                      <input type="text" formControlName="audio_url" placeholder="https://..."
+                             class="flex-1 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-xs focus:ring-4 focus:ring-primary/20 transition-all outline-none">
+                      <button type="button" 
+                              (click)="wordForm.get('audio_url')?.value ? playAudio(wordForm.get('audio_url')?.value) : null"
+                              [disabled]="!wordForm.get('audio_url')?.value"
+                              class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-primary rounded-2xl border border-slate-200 dark:border-slate-700 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Translation (Vietnamese) -->
+                  <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Translation (Vietnamese)</label>
+                    <input type="text" formControlName="definition_vi" placeholder="Vietnamese meaning"
+                           class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-primary/20 transition-all outline-none">
+                  </div>
+
+                  <!-- Example Sentence -->
+                  <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Example Sentence</label>
+                    <textarea formControlName="example" rows="3" placeholder="Example usage in context..."
+                              class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-primary/20 transition-all outline-none resize-none"></textarea>
+                  </div>
+
+                  <!-- Modal Footer -->
+                  <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/5 mt-4">
+                    <button type="button" (click)="closeForm()" 
+                            class="px-8 py-3 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold text-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-all">
+                      Cancel
+                    </button>
+                    <button type="submit" [disabled]="wordForm.invalid" 
+                            class="px-10 py-3 bg-[#e11d48] text-white rounded-2xl font-black text-sm shadow-xl shadow-rose-500/20 hover:scale-105 active:scale-95 transition-all">
+                      Save & Close
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           }
 
           <!-- Table -->
-          <div class="overflow-hidden rounded-2xl border border-gray-100 dark:border-white/5">
+    <div class="overflow-hidden rounded-2xl border border-gray-100 dark:border-white/5">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="bg-gray-50 dark:bg-white/5">
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Từ vựng</th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Phiên âm</th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Loại từ</th>
-                  <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Định nghĩa</th>
+                  <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Định nghĩa (EN)</th>
+                  <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Nghĩa (VI)</th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Thao tác</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 dark:divide-white/5">
                 @for (v of vocabularies(); track v.id) {
                   <tr class="hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors">
-                    <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">{{ v.term }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-500">{{ v.ipa }}</td>
                     <td class="px-6 py-4">
-                      <span class="px-2 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded text-[10px] font-black uppercase">{{ v.word_type }}</span>
+                      <div class="flex items-center gap-3">
+                        <span class="font-bold text-gray-900 dark:text-white">{{ v.term }}</span>
+                        @if (v.audio_url) {
+                          <button type="button" (click)="playAudio(v.audio_url)" 
+                                  class="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary rounded-full hover:bg-primary hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                          </button>
+                        }
+                      </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-500 truncate max-w-xs">{{ v.definition }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 italic">{{ v.ipa }}</td>
+                    <td class="px-6 py-4">
+                      <span class="px-2 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded text-[10px] font-black uppercase tracking-tight">{{ v.word_type }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-[200px]">
+                      <div class="line-clamp-2" [title]="v.definition">{{ v.definition }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-emerald-600 dark:text-emerald-400 font-bold max-w-[200px]">
+                      <div class="line-clamp-2" [title]="v.definition_vi">{{ v.definition_vi }}</div>
+                    </td>
                     <td class="px-6 py-4">
                        <div class="flex items-center gap-2">
                         <button type="button" (click)="editWord(v)" class="p-2 text-gray-400 hover:text-primary transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
@@ -164,11 +226,14 @@ export class AdminLessonVocabularyComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private lessonEditService = inject(LessonEditService);
   private vocabularyService = inject(VocabularyService);
+  private dictionaryService = inject(DictionaryService);
   
   loading = this.lessonEditService.loading;
   vocabularies = signal<Vocabulary[]>([]);
   showForm = signal(false);
   editingVocab = signal<Vocabulary | null>(null);
+  isFetching = signal(false);
+  isAutoFilled = signal(false);
 
   get courseSlug() { return this.route.parent?.snapshot.paramMap.get('courseSlug') || ''; }
   get lessonSlug() { return this.route.parent?.snapshot.paramMap.get('lessonSlug') || ''; }
@@ -181,8 +246,10 @@ export class AdminLessonVocabularyComponent implements OnInit {
     term: ['', [Validators.required]],
     ipa: [''],
     definition: ['', [Validators.required]],
+    definition_vi: [''],
     example: [''],
-    word_type: ['noun']
+    word_type: [''],
+    audio_url: ['']
   });
 
   constructor() {
@@ -206,19 +273,65 @@ export class AdminLessonVocabularyComponent implements OnInit {
 
   openAddForm() {
     this.editingVocab.set(null);
-    this.wordForm.reset({ word_type: 'noun' });
+    this.wordForm.reset({ word_type: '', audio_url: '' });
+    this.isAutoFilled.set(false);
     this.showForm.set(true);
   }
 
   editWord(v: Vocabulary) {
     this.editingVocab.set(v);
     this.wordForm.patchValue(v);
+    this.isAutoFilled.set(false);
     this.showForm.set(true);
   }
 
   closeForm() {
     this.showForm.set(false);
     this.editingVocab.set(null);
+    this.isAutoFilled.set(false);
+  }
+
+  fetchDetails() {
+    const term = this.wordForm.get('term')?.value;
+    if (!term) return;
+
+    this.isFetching.set(true);
+    this.dictionaryService.fetchWordDetails(term).subscribe(details => {
+      this.isFetching.set(false);
+      if (details) {
+        // Map part of speech
+        const pos = details.meanings[0]?.partOfSpeech;
+        let wordType = 'noun';
+        if (pos?.includes('verb')) wordType = 'verb';
+        else if (pos?.includes('adjective')) wordType = 'adj';
+        else if (pos?.includes('adverb')) wordType = 'adv';
+
+        // Find first valid audio URL
+        const audio = details.phonetics.find(p => p.audio && p.audio.length > 0)?.audio || '';
+
+        this.wordForm.patchValue({
+          ipa: details.phonetic || details.phonetics.find(p => p.text)?.text || '',
+          word_type: pos || 'noun',
+          definition: details.meanings[0]?.definitions[0]?.definition || '',
+          definition_vi: details.definition_vi || '',
+          example: details.meanings[0]?.definitions[0]?.example || '',
+          audio_url: audio
+        });
+        this.isAutoFilled.set(true);
+      } else {
+        alert('Không tìm thấy thông tin từ vựng này.');
+      }
+    });
+  }
+
+  playAudio(url: any) {
+    if (!url) return;
+    try {
+      const audio = new Audio(url);
+      audio.play().catch(err => console.error('Audio playback failed:', err));
+    } catch (e) {
+      console.error('Error creating audio object:', e);
+    }
   }
 
   onWordSubmit() {
