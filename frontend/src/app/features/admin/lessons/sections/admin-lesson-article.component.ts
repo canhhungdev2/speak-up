@@ -52,8 +52,9 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
                 [courseSlug]="courseSlug"
                 [lessonSlug]="lessonSlug"
                 [customName]="'MainArticle'"
+                (uploadSuccess)="onAudioUpload($event)"
               ></app-admin-audio-upload>
-            </div>
+      </div>
           </div>
         </div>
 
@@ -180,6 +181,10 @@ export class AdminLessonArticleComponent implements OnInit {
   }
 
   ngOnInit() {}
+
+  onAudioUpload(url: string) {
+    this.lessonEditService.saveSection({ main_audio_url: url }).subscribe();
+  }
 
   onSave() {
     if (this.articleForm.invalid) return;

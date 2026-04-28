@@ -1,14 +1,16 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { LessonEditService } from '../lesson-edit.service';
 import { VocabularyService, Vocabulary } from '../../../../core/services/vocabulary.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AdminAudioUploadComponent } from '../../../../shared/components/admin-audio-upload.component';
 
 @Component({
   selector: 'app-admin-lesson-vocabulary',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, AdminAudioUploadComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-in slide-in-from-right-10 duration-500">
@@ -26,10 +28,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
           </div>
           
           <div class="max-w-2xl space-y-2">
-            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Vocabulary Audio URL (.mp3)</label>
-            <input type="text" formControlName="vocab_audio_url"
-                   class="w-full bg-gray-50 dark:bg-white/2 border-none rounded-xl py-4 px-6 text-sm font-medium text-gray-600 dark:text-gray-300 focus:ring-4 focus:ring-primary/20 transition-all">
-          </div>
+            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tải lên Audio Từ vựng</label>
+            <app-admin-audio-upload 
+              formControlName="vocab_audio_url"
+              [courseSlug]="courseSlug"
+              [lessonSlug]="lessonSlug"
+              [customName]="'Vocabulary'"
+              (uploadSuccess)="onAudioUpload($event)"
+            ></app-admin-audio-upload>
+    </div>
         </div>
 
         <!-- Vocabulary List -->
@@ -154,6 +161,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class AdminLessonVocabularyComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
   private lessonEditService = inject(LessonEditService);
   private vocabularyService = inject(VocabularyService);
   
@@ -161,6 +169,9 @@ export class AdminLessonVocabularyComponent implements OnInit {
   vocabularies = signal<Vocabulary[]>([]);
   showForm = signal(false);
   editingVocab = signal<Vocabulary | null>(null);
+
+  get courseSlug() { return this.route.parent?.snapshot.paramMap.get('courseSlug') || ''; }
+  get lessonSlug() { return this.route.parent?.snapshot.paramMap.get('lessonSlug') || ''; }
 
   vocabForm = this.fb.group({
     vocab_audio_url: ['']
@@ -237,6 +248,10 @@ export class AdminLessonVocabularyComponent implements OnInit {
       const lessonId = this.lessonEditService.lesson()?.id;
       if (lessonId) this.loadVocabularies(lessonId);
     });
+  }
+
+  onAudioUpload(url: string) {
+    this.lessonEditService.saveSection({ vocab_audio_url: url }).subscribe();
   }
 
   onSave() {

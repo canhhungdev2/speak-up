@@ -1,4 +1,4 @@
-import { Component, Input, signal, inject, forwardRef, ElementRef, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, inject, forwardRef, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MediaService } from '../../core/services/media.service';
@@ -86,10 +86,11 @@ import { environment } from '../../../environments/environment';
     :host { display: block; }
   `]
 })
-export class AdminAudioUploadComponent implements ControlValueAccessor {
+export class AdminAudioUploadComponent implements ControlValueAccessor, OnDestroy {
   @Input() courseSlug: string = '';
   @Input() lessonSlug: string = '';
   @Input() customName: string = '';
+  @Output() uploadSuccess = new EventEmitter<string>();
 
   private mediaService = inject(MediaService);
   
@@ -150,6 +151,7 @@ export class AdminAudioUploadComponent implements ControlValueAccessor {
           this.isUploading.set(false);
           this.value = event.body.url; // Extract URL from object
           this.onChange(this.value);
+          this.uploadSuccess.emit(this.value);
         }
       },
       error: () => {
@@ -177,6 +179,11 @@ export class AdminAudioUploadComponent implements ControlValueAccessor {
   clear() {
     this.value = '';
     this.onChange(this.value);
+    this.audio.pause();
+    this.isPlaying.set(false);
+  }
+
+  ngOnDestroy() {
     this.audio.pause();
     this.isPlaying.set(false);
   }
