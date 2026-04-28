@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Param, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import 'multer';
 import { MediaService } from './media.service';
 import type { Response } from 'express';
 

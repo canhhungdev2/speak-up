@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import 'multer';
 import { ConfigService } from '@nestjs/config';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
