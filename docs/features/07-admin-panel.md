@@ -33,11 +33,19 @@ Sử dụng các thẻ thống kê với hiệu ứng "Glow" (phát sáng) theo 
 - **Kéo thả (Drag & Drop)**: Sử dụng Angular CDK để thay đổi thứ tự học tập trực quan.
 - Tự động cập nhật `order_index` vào database.
 
-### 5. Trang Chỉnh sửa bài học (Lesson Editor)
-- **File**: `frontend/src/app/features/admin/lessons/admin-lesson-edit.component.ts`
-- **URL**: `/admin/courses/:courseSlug/lessons/edit/:lessonSlug`
-- Hỗ trợ đầy đủ thông tin: Tiêu đề, Loại (Video/Audio/Story/Quiz), Content URL, Thời lượng.
-- **Trình soạn thảo song ngữ (Bilingual Editor)**: Quản lý mảng nội dung Anh - Việt theo dạng thẻ, dễ dàng thêm/bớt và chỉnh sửa lời thoại.
+### 5. Quản lý Bài học Đa màn hình (Advanced Lesson Editor)
+- **Cấu trúc**: Chuyển đổi từ form đơn lẻ sang hệ thống Tabbed Navigation chuyên sâu.
+- **File Layout**: `frontend/src/app/features/admin/lessons/admin-lesson-edit.component.ts`
+- **Các phân hệ (Sections)**:
+    - **Main Article**: Quản lý Tiêu đề, Audio chính và trình soạn thảo nội dung song ngữ (Bilingual Content).
+    - **Vocabulary**: Quản lý Audio từ vựng và hệ thống CRUD từ vựng đầy đủ (Thêm/Sửa/Xóa từng từ).
+    - **Mini Story**: Quản lý danh sách các câu chuyện ngắn đi kèm bài học.
+    - **Point Of View (POV)**: Cấu hình audio và transcript cho phần luyện ngữ pháp tự nhiên.
+    - **Commentary**: Cấu hình audio và transcript cho phần giải thích chuyên sâu.
+- **Tính năng đặc biệt**: 
+    - Lưu độc lập cho từng phần giúp tối ưu hóa luồng công việc.
+    - Hệ thống route con (child routes) cho phép truy cập trực tiếp qua URL.
+    - Sử dụng **LessonEditService** để đồng bộ trạng thái bài học giữa các tab.
 
 ## Media & Storage
 Hệ thống sử dụng cấu trúc lưu trữ phân cấp ngoài dự án (`STORAGE_PATH`):

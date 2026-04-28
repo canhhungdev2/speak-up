@@ -3,14 +3,26 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export interface MiniStory {
+  id?: string;
+  lesson_id?: string;
+  audio_url: string;
+  vtt_url: string;
+  order_index?: number;
+}
+
 export interface Lesson {
   id: string;
   course_id: string;
   title: string;
-  type: string;
-  content_url: string;
-  content_bilingual: any[];
-  duration: number;
+  main_audio_url: string;
+  main_content_bilingual: { en: string; vi: string; }[];
+  vocab_audio_url: string;
+  pov_audio_url: string;
+  pov_vtt_url: string;
+  commentary_audio_url: string;
+  commentary_vtt_url: string;
+  mini_stories: MiniStory[];
   slug: string;
   order_index?: number;
 }

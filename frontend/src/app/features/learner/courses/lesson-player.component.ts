@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MediaService } from '../../../core/services/media.service';
 import { LessonService } from '../../../core/services/lesson.service';
+import { environment } from '../../../../environments/environment';
 
 interface StorySentence {
   text: string;
@@ -17,7 +18,7 @@ interface MiniStory {
   id: string;
   title: string;
   audioUrl: string;
-  vttUrl?: string; // URL của file phụ đề
+  vttUrl?: string;
   sentences: StorySentence[];
 }
 
@@ -39,16 +40,8 @@ interface LessonSection {
   imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex h-[calc(100vh-6rem)] overflow-hidden relative">
+    <div class="flex h-[calc(100vh-6rem)] overflow-hidden relative" *ngIf="lessonData() as lesson">
       
-      <!-- Mobile Section Selector (Floating Button) -->
-      <button (click)="isSectionMenuOpen.set(true)" 
-              class="lg:hidden fixed bottom-32 right-6 w-14 h-14 bg-white dark:bg-[#1e293b] shadow-2xl rounded-full flex items-center justify-center text-primary z-[105] border border-gray-100 dark:border-white/10 active:scale-95 transition-all">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-          </svg>
-      </button>
-
       <!-- Lesson Sections Sidebar (Desktop) -->
       <aside class="w-80 border-r border-gray-100 dark:border-white/5 bg-white dark:bg-[#1e293b]/30 overflow-y-auto hidden lg:block scrollbar-hide shrink-0">
         <div class="p-6">
@@ -71,53 +64,16 @@ interface LessonSection {
                           {{ section.type }}
                         </p>
                     </div>
-                    @if (isCompleted(section.id)) {
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                      </svg>
-                    }
                   </button>
               }
             </nav>
         </div>
       </aside>
 
-      <!-- Mobile Drawer for Sections -->
-      <div *ngIf="isSectionMenuOpen()" 
-            (click)="isSectionMenuOpen.set(false)"
-            class="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex flex-col justify-end">
-          <div (click)="$event.stopPropagation()"
-              class="bg-white dark:bg-[#0f172a] rounded-t-[3rem] p-8 max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
-            <div class="w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full mx-auto mb-8"></div>
-            <h3 class="text-xl font-black text-gray-900 dark:text-white mb-6 font-outfit px-2">Chọn phần bài học</h3>
-            <nav class="space-y-2">
-              @for (section of sections(); track section.id) {
-                  <button (click)="setActiveSection(section); isSectionMenuOpen.set(false)"
-                          [class.bg-primary/10]="activeSection().id === section.id"
-                          [class.text-primary]="activeSection().id === section.id"
-                          class="w-full flex items-center gap-4 px-6 py-5 rounded-[2rem] hover:bg-gray-50 dark:hover:bg-white/5 transition-all text-left group border border-transparent"
-                          [class.border-primary/20]="activeSection().id === section.id">
-                    <span class="text-2xl">{{ section.icon }}</span>
-                    <div class="flex-grow">
-                        <p class="font-black text-base">{{ section.title }}</p>
-                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-0.5">{{ section.type }}</p>
-                    </div>
-                    @if (isCompleted(section.id)) {
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                      </svg>
-                    }
-                  </button>
-              }
-            </nav>
-          </div>
-      </div>
-
       <!-- Main Content Area -->
       <main class="flex-grow overflow-y-auto p-4 md:p-12 bg-gray-50 dark:bg-transparent relative scrollbar-hide">
           <div class="max-w-6xl mx-auto pb-40 md:pb-32">
             
-            <!-- Section Header -->
             <div class="mb-8 md:mb-12">
                 <span class="px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full mb-4 inline-block">
                   {{ activeSection().type }}
@@ -127,75 +83,51 @@ interface LessonSection {
                 </h1>
             </div>
 
-            <!-- Content Switcher -->
             @switch (activeSection().type) {
                 @case ('article') {
                   <div class="space-y-12">
                       @for (p of activeSection().paragraphs; track p.en) {
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-20 group">
-                            <!-- English Column -->
-                            <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-800 dark:text-slate-200 leading-relaxed tracking-tight transition-colors group-hover:text-black dark:group-hover:text-white"
-                                [innerHTML]="p.en">
-                            </div>
-                            
-                            <!-- Vietnamese Column -->
-                            <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-500/80 dark:text-slate-400/80 leading-relaxed italic border-l-2 border-gray-100 dark:border-white/5 pl-8 md:pl-16 transition-all group-hover:text-gray-700 dark:group-hover:text-slate-300 group-hover:border-primary/30"
-                                [innerHTML]="p.vi">
-                            </div>
+                            <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-800 dark:text-slate-200 leading-relaxed tracking-tight" [innerHTML]="p.en"></div>
+                            <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-500/80 dark:text-slate-400/80 italic border-l-2 border-gray-100 pl-8" [innerHTML]="p.vi"></div>
                         </div>
                       }
                   </div>
                 }
                 @case ('vocab') {
                   <div class="space-y-6">
-                      <p class="text-base md:text-lg text-gray-500 dark:text-slate-400 mb-8 italic">
-                        Nghe giải thích chi tiết các từ vựng quan trọng xuất hiện trong bài học này.
-                      </p>
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @for (vocab of activeSection().vocabList; track vocab.term) {
+                        @for (vocab of lesson.vocabularies; track vocab.id) {
                             <div class="p-6 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-[2rem] hover:border-primary/30 transition-all group">
-                              <div class="flex justify-between items-start mb-2">
-                                  <h3 class="text-xl font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors">
-                                    {{ vocab.term }}
-                                  </h3>
-                                  <button class="p-2 bg-gray-50 dark:bg-white/5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                  </button>
-                              </div>
-                              <p class="text-gray-500 dark:text-slate-400 font-medium">{{ vocab.definition }}</p>
+                                <h3 class="text-xl font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors">{{ vocab.term }}</h3>
+                                <p class="text-gray-400 text-sm mb-1">{{ vocab.ipa }} | {{ vocab.word_type }}</p>
+                                <p class="text-gray-500 dark:text-slate-400 font-medium">{{ vocab.definition }}</p>
+                                <p class="mt-3 text-xs italic text-gray-400">"{{ vocab.example }}"</p>
                             </div>
                         }
                       </div>
                   </div>
                 }
                 @case ('story') {
-                  <div class="space-y-8 md:space-y-12">
-                      <!-- Story Tabs -->
-                      <div class="flex gap-2 p-1.5 bg-gray-100 dark:bg-white/5 rounded-2xl w-full md:w-fit overflow-x-auto scrollbar-hide">
+                  <div class="space-y-8">
+                      <div class="flex gap-2 p-1.5 bg-gray-100 dark:bg-white/5 rounded-2xl w-fit overflow-x-auto">
                         @for (story of activeSection().stories; track story.id; let i = $index) {
                             <button (click)="setActiveStory(i)"
                                     [class.bg-white]="activeStoryIndex() === i"
-                                    [class.dark:bg-white/10]="activeStoryIndex() === i"
-                                    [class.shadow-sm]="activeStoryIndex() === i"
-                                    class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all text-gray-500 dark:text-slate-400 whitespace-nowrap"
+                                    class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
                                     [class.text-primary]="activeStoryIndex() === i">
                                 Story {{ i + 1 }}
                             </button>
                         }
                       </div>
 
-                      <div class="bg-white dark:bg-white/5 p-8 md:p-14 rounded-[2.5rem] md:rounded-[3rem] border border-gray-100 dark:border-white/10 relative overflow-hidden shadow-sm">
+                      <div class="bg-white dark:bg-white/5 p-8 md:p-14 rounded-[2.5rem] border border-gray-100 dark:border-white/10 relative overflow-hidden shadow-sm">
                         <div class="flex flex-wrap gap-x-2 gap-y-3">
                           @for (s of currentStory()?.sentences; track $index) {
                             <span [id]="'sentence-' + $index"
                                   (click)="seekAudio(s.startTime)"
                                   [class.bg-primary/20]="currentSentenceIndex() === $index"
-                                  [class.text-primary-dark]="currentSentenceIndex() === $index"
-                                  [class.dark:text-primary-light]="currentSentenceIndex() === $index"
-                                  [class.scale-[1.02]]="currentSentenceIndex() === $index"
-                                  class="text-xl md:text-3xl font-medium text-gray-700 dark:text-slate-300 leading-relaxed cursor-pointer transition-all duration-300 hover:text-primary rounded-lg px-1 py-0.5">
+                                  class="text-xl md:text-3xl font-medium text-gray-700 dark:text-slate-300 leading-relaxed cursor-pointer rounded-lg px-1 py-0.5">
                                 {{ s.text }}
                             </span>
                           }
@@ -204,88 +136,57 @@ interface LessonSection {
                   </div>
                 }
                 @case ('pov') {
-                  <div class="bg-indigo-50/50 dark:bg-indigo-500/5 p-8 md:p-10 rounded-[2.5rem] border border-indigo-100/50 dark:border-indigo-500/10">
+                  <div class="bg-indigo-50/50 dark:bg-indigo-500/5 p-8 md:p-10 rounded-[2.5rem] border border-indigo-100/50">
                       <p class="text-lg md:text-xl font-medium text-indigo-900/80 dark:text-indigo-300/80 leading-relaxed">
-                        {{ activeSection().content }}
+                        Phần Point of View giúp bạn luyện tập ngữ pháp một cách tự nhiên bằng cách nghe lại câu chuyện ở các thời điểm khác nhau.
                       </p>
                   </div>
                 }
                 @case ('commentary') {
-                  <div class="space-y-8">
-                      <div class="p-8 bg-amber-50/50 dark:bg-amber-500/5 rounded-[2.5rem] border border-amber-100/50 dark:border-amber-500/10">
-                        <p class="text-base md:text-lg text-amber-900/70 dark:text-amber-300/70 leading-relaxed italic">
-                            Phần bình luận giúp bạn hiểu sâu hơn về văn hóa và cách dùng từ trong thực tế.
-                        </p>
-                      </div>
+                  <div class="p-8 bg-amber-50/50 dark:bg-amber-500/5 rounded-[2.5rem] border border-amber-100/50">
+                      <p class="text-base md:text-lg text-amber-900/70 dark:text-amber-300/70 leading-relaxed italic">
+                          Lắng nghe những chia sẻ thêm từ giáo viên về chủ đề của bài học.
+                      </p>
                   </div>
                 }
             }
           </div>
       </main>
 
-      <!-- Premium Global Audio Player -->
-      <footer class="fixed bottom-0 left-0 right-0 h-24 md:h-28 bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-2xl border-t border-gray-100 dark:border-white/5 z-[110] px-4 md:px-10 flex items-center">
+      <footer class="fixed bottom-0 left-0 right-0 h-24 bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-2xl border-t border-gray-100 dark:border-white/5 z-[110] px-4 md:px-10 flex items-center">
           <div class="max-w-7xl mx-auto w-full flex items-center gap-4 md:gap-12">
-            
-            <!-- Track Info (Hidden on very small screens) -->
-            <div class="hidden sm:flex items-center gap-3 md:gap-4 w-40 md:w-64 shrink-0">
-                <div class="w-10 h-10 md:w-14 md:h-14 bg-primary/20 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-2xl">
-                  {{ activeSection().icon }}
-                </div>
+            <div class="hidden sm:flex items-center gap-4 w-64 shrink-0">
+                <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center text-2xl">{{ activeSection().icon }}</div>
                 <div class="min-w-0">
-                  <p class="font-black text-xs md:text-sm text-gray-900 dark:text-white truncate">{{ activeSection().title }}</p>
-                  <p class="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-widest mt-0.5">Playing...</p>
+                  <p class="font-black text-sm text-gray-900 dark:text-white truncate">{{ activeSection().title }}</p>
+                  <p class="text-[10px] font-black text-primary uppercase tracking-widest mt-0.5">Playing...</p>
                 </div>
             </div>
 
-            <!-- Main Controls -->
-            <div class="flex-grow flex flex-col gap-1 md:gap-2">
-                <div class="flex items-center justify-center gap-4 md:gap-8">
-                  <button class="text-gray-400 hover:text-primary transition-colors hidden xs:block">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
-                      </svg>
-                  </button>
-                  <button (click)="togglePlay()" class="w-12 h-12 md:w-14 md:h-14 bg-primary rounded-full flex items-center justify-center text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all">
+            <div class="flex-grow flex flex-col gap-2">
+                <div class="flex items-center justify-center gap-8">
+                  <button (click)="togglePlay()" class="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white shadow-xl shadow-primary/30 hover:scale-105 transition-all">
                       @if (isPlaying()) {
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
                       } @else {
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                       }
-                  </button>
-                  <button class="text-gray-400 hover:text-primary transition-colors hidden xs:block">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
-                      </svg>
                   </button>
                 </div>
                 
-                <!-- Progress Bar -->
-                <div class="flex items-center gap-3 md:gap-4">
-                  <span class="text-[9px] md:text-[10px] font-bold text-gray-400 tabular-nums w-7 md:w-10">{{ formatTime(currentTime()) }}</span>
-                  <div class="flex-grow h-1 md:h-1.5 bg-gray-100 dark:bg-white/10 rounded-full relative overflow-hidden group cursor-pointer"
-                       (click)="onProgressBarClick($event)">
-                      <div class="h-full bg-primary rounded-full relative transition-all duration-100"
-                           [style.width.%]="progress()"></div>
+                <div class="flex items-center gap-4">
+                  <span class="text-[10px] font-bold text-gray-400 tabular-nums w-10">{{ formatTime(currentTime()) }}</span>
+                  <div class="flex-grow h-1.5 bg-gray-100 dark:bg-white/10 rounded-full relative overflow-hidden cursor-pointer" (click)="onProgressBarClick($event)">
+                      <div class="h-full bg-primary rounded-full transition-all duration-100" [style.width.%]="progress()"></div>
                   </div>
-                  <span class="text-[9px] md:text-[10px] font-bold text-gray-400 tabular-nums w-7 md:w-10">{{ formatTime(duration()) }}</span>
+                  <span class="text-[10px] font-bold text-gray-400 tabular-nums w-10">{{ formatTime(duration()) }}</span>
                 </div>
             </div>
 
-            <!-- Extra Controls (Hidden on mobile) -->
-            <div class="hidden sm:flex items-center justify-end gap-3 md:gap-6 w-24 md:w-64 shrink-0">
-                <button (click)="cyclePlaybackSpeed()" class="text-[10px] md:text-xs font-black px-2 md:px-3 py-1 md:py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg text-gray-500 hover:text-primary transition-all">
+            <div class="hidden sm:flex items-center justify-end gap-6 w-64 shrink-0">
+                <button (click)="cyclePlaybackSpeed()" class="text-xs font-black px-3 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg text-gray-500 hover:text-primary transition-all">
                   {{ playbackSpeed() }}x
                 </button>
-                <div class="hidden lg:flex items-center gap-2 group">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6a9 9 0 010 12m0 0v.001M12 6v.001m0-.001v-.001M12 18v.001" />
-                  </svg>
-                </div>
             </div>
           </div>
       </footer>
@@ -294,24 +195,91 @@ interface LessonSection {
   styles: [`
     :host { display: block; }
     .scrollbar-hide::-webkit-scrollbar { display: none; }
-    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     .font-merriweather { font-family: 'Merriweather', serif; }
   `]
 })
 export class LessonPlayerComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private mediaService = inject(MediaService);
   private lessonService = inject(LessonService);
 
-  lessonTitle = signal('Loading...');
-  isSectionMenuOpen = signal(false);
+  lessonData = signal<any>(null);
   activeStoryIndex = signal(0);
   isPlaying = signal(false);
   currentTime = signal(0);
   duration = signal(0);
   playbackSpeed = signal(1);
 
+  sections = computed<LessonSection[]>(() => {
+    const lesson = this.lessonData();
+    if (!lesson) return [];
+
+    const list: LessonSection[] = [];
+    
+    // 1. Main Article
+    list.push({
+      id: 'article',
+      title: 'Main Article',
+      icon: '📄',
+      type: 'article',
+      audioUrl: lesson.main_audio_url,
+      paragraphs: lesson.main_content_bilingual || []
+    });
+
+    // 2. Vocabulary
+    list.push({
+      id: 'vocab',
+      title: 'Vocabulary',
+      icon: '📚',
+      type: 'vocab',
+      audioUrl: lesson.vocab_audio_url
+    });
+
+    // 3. Mini Stories
+    if (lesson.mini_stories && lesson.mini_stories.length > 0) {
+      list.push({
+        id: 'stories',
+        title: 'Mini Stories',
+        icon: '💬',
+        type: 'story',
+        audioUrl: lesson.mini_stories[0].audio_url,
+        stories: lesson.mini_stories.map((ms: any) => ({
+          id: ms.id,
+          title: ms.title || 'Mini Story',
+          audioUrl: ms.audio_url,
+          vttUrl: ms.vtt_url,
+          sentences: []
+        }))
+      });
+    }
+
+    // 4. POV
+    if (lesson.pov_audio_url) {
+      list.push({
+        id: 'pov',
+        title: 'Point of View',
+        icon: '🔄',
+        type: 'pov',
+        audioUrl: lesson.pov_audio_url
+      });
+    }
+
+    // 5. Commentary
+    if (lesson.commentary_audio_url) {
+      list.push({
+        id: 'commentary',
+        title: 'Commentary',
+        icon: '🎙️',
+        type: 'commentary',
+        audioUrl: lesson.commentary_audio_url
+      });
+    }
+
+    return list;
+  });
+
+  activeSection = signal<LessonSection>(null as any);
+  
   progress = computed(() => {
     const d = this.duration();
     if (d === 0) return 0;
@@ -320,113 +288,9 @@ export class LessonPlayerComponent implements OnInit {
 
   private audio = new Audio();
 
-  sections = signal<LessonSection[]>([
-    {
-      id: 'article',
-      title: 'Main Article',
-      icon: '📄',
-      type: 'article',
-      audioUrl: 'article.mp3',
-      paragraphs: [
-        {
-          en: 'HIGH PRICE OF MOM\'S HELP IS <b>DRAG</b> ON FAMILY BUSINESS',
-          vi: 'GIÁ CAO CỦA VIỆC MẸ GIÚP ĐANG TRỞ THÀNH <b>GÁNH NẶNG</b> CHO DOANH NGHIỆP GIA ĐÌNH'
-        },
-        {
-          en: 'DEAR ABBY:',
-          vi: 'GỬI ABBY THÂN MẾN:'
-        },
-        {
-          en: 'Twenty years ago, my sister and I bought a business from our mother. We all love and respect one another and get along well. We will be finished <b>paying off</b> the business in two years.',
-          vi: 'Hai mươi năm trước, tôi và chị gái đã mua lại doanh nghiệp từ mẹ của chúng tôi. Chúng tôi đều yêu thương, tôn trọng lẫn nhau và hòa thuận với nhau. Chúng tôi sẽ hoàn tất việc thanh toán cho doanh nghiệp này trong hai năm nữa.'
-        },
-        {
-          en: 'Our problem: Mom, who is now 77, still <b>draws a salary</b> from us <b>above and beyond</b> the payment for the business. Her <b>workload</b> has <b>lessened</b> greatly, as it should. She could do all of her work in one day and lessen the <b>burden</b> of her salary. However, she says she\'d "go crazy" if she retired. We don\'t want that. She could still come in as often as she wants and do her personal paperwork, banking, letter-writing, reading, etc. These are all things she does at "work" -- <b>on the clock</b>.',
-          vi: 'Vấn đề của chúng tôi: Mẹ, hiện đã 77 tuổi, vẫn nhận lương từ chúng tôi ngoài khoản tiền thanh toán cho việc mua lại doanh nghiệp. Khối lượng công việc của bà đã giảm đi rất nhiều, đúng như lẽ ra phải vậy. Bà có thể hoàn thành toàn bộ công việc chỉ trong một ngày và giảm bớt gánh nặng từ mức lương của mình. Tuy nhiên, bà nói rằng bà sẽ "phát điên" nếu nghỉ hưu. Chúng tôi không muốn điều đó xảy ra. Bà vẫn có thể đến chỗ làm bất cứ khi nào bà muốn và làm các công việc cá nhân như giấy tờ riêng, giao dịch ngân hàng, viết thư, đọc sách, v.v. Đây đều là những việc bà hiện đang làm tại "nơi làm việc" — trong giờ làm và vẫn được tính lương.'
-        },
-        {
-          en: 'If we try to discuss this, Mom gets hurt and says, "Just let me know when I\'m not worth the money." We don\'t want to do that. We would hope she would see the fairness of this and suggest it herself.',
-          vi: 'Nếu chúng tôi cố gắng thảo luận về vấn đề này, mẹ sẽ bị tổn thương và nói: "Cứ nói cho mẹ biết khi nào mẹ không còn xứng đáng với số tiền đó nữa." Chúng tôi không muốn làm như vậy. Chúng tôi hy vọng bà sẽ tự nhận ra sự hợp lý của vấn đề này và tự mình đề xuất.'
-        },
-        {
-          en: 'Business <b>expenses</b> are <b>going through the roof</b>, and there are <b>updates</b> we should make, but we can\'t do it as long as we are paying Mom at the level we are, <b>on top of</b> the money for the <b>buy-out</b>.',
-          vi: 'Chi phí kinh doanh đang tăng vọt, và có nhiều cải tiến mà chúng tôi nên thực hiện, nhưng chúng tôi không thể làm được điều đó khi vẫn đang trả lương cho mẹ ở mức như hiện tại, cộng thêm khoản tiền cho việc mua lại doanh nghiệp.'
-        },
-        {
-          en: '-- DAUGHTERS DEAREST',
-          vi: '-- NHỮNG NGƯỜI CON GÁI THÂN YÊU'
-        }
-      ]
-    },
-    {
-      id: 'vocab',
-      title: 'Vocabulary',
-      icon: '📚',
-      type: 'vocab',
-      audioUrl: 'vocab.mp3',
-      vocabList: [
-        { term: 'Persistence', definition: 'Sự kiên trì, bền bỉ (The quality of continuing to do something)' },
-        { term: 'Mastery', definition: 'Sự tinh thông, làm chủ (Great skill or knowledge of something)' },
-        { term: 'Consistent', definition: 'Nhất quán, đều đặn (Always behaving or happening in a similar way)' },
-        { term: 'Challenge', definition: 'Thử thách (A task or situation that tests someone\'s abilities)' },
-      ]
-    },
-    {
-      id: 'stories',
-      title: 'Mini Stories',
-      icon: '💬',
-      type: 'story',
-      audioUrl: 'story1.mp3',
-      stories: [
-        { 
-          id: 's1', 
-          title: 'The Persistent Turtle', 
-          audioUrl: 'story1.mp3',
-          vttUrl: 'story1.vtt',
-          sentences: [] // Sẽ được load từ VTT
-        },
-        { 
-          id: 's2', 
-          title: 'The Golden Goal', 
-          audioUrl: 'story2.mp3',
-          vttUrl: 'story2.vtt',
-          sentences: []
-        },
-        { 
-          id: 's3', 
-          title: 'The Weaver of Stars (Long Text)', 
-          audioUrl: 'story3.mp3',
-          vttUrl: 'story3.vtt',
-          sentences: []
-        }
-      ]
-    },
-    {
-      id: 'pov',
-      title: 'Point of View',
-      icon: '🔄',
-      type: 'pov',
-      audioUrl: 'pov.mp3',
-      content: 'In this version, I will tell the story from the future. Toby will have already climbed the mountain. He had been very persistent for many months before he finally reached the peak. Everyone had laughed at him, but he didn\'t care.'
-    },
-    {
-      id: 'commentary',
-      title: 'Commentary',
-      icon: '🎙️',
-      type: 'commentary',
-      audioUrl: 'commentary.mp3',
-      content: 'Hello everyone, welcome to the commentary for this lesson. Today I want to talk about why so many students fail to reach fluency. It is usually not a lack of talent, but a lack of persistence...'
-    }
-  ]);
-
-  lessonData = signal<any>(null);
-
-  activeSection = signal<LessonSection>(this.sections()[0]);
-  completedSections = signal<Set<string>>(new Set());
-
   currentStory = computed(() => {
     const section = this.activeSection();
-    if (section.type === 'story' && section.stories) {
+    if (section?.type === 'story' && section.stories) {
       return section.stories[this.activeStoryIndex()];
     }
     return null;
@@ -455,41 +319,15 @@ export class LessonPlayerComponent implements OnInit {
 
     if (courseSlug && lessonSlug) {
       this.lessonService.findOneBySlug(courseSlug, lessonSlug).subscribe(lesson => {
-        this.lessonTitle.set(lesson.title);
         this.lessonData.set(lesson);
-        
-        // Cập nhật section Article với dữ liệu từ DB
-        const sections = this.sections();
-        const articleSection = sections.find(s => s.id === 'article');
-        if (articleSection && lesson.content_bilingual) {
-          articleSection.paragraphs = lesson.content_bilingual;
-        }
-        
-        // Nếu là story, cần setup media
+        this.activeSection.set(this.sections()[0]);
         this.updateAudioSource();
       });
     }
 
-    this.audio.addEventListener('timeupdate', () => {
-      this.currentTime.set(this.audio.currentTime);
-    });
-    this.audio.addEventListener('durationchange', () => {
-      if (this.audio.duration && !isNaN(this.audio.duration)) {
-        this.duration.set(this.audio.duration);
-      }
-    });
-    this.audio.addEventListener('loadedmetadata', () => {
-      if (this.audio.duration && !isNaN(this.audio.duration)) {
-        this.duration.set(this.audio.duration);
-      }
-    });
-    this.audio.addEventListener('ended', () => {
-      this.isPlaying.set(false);
-    });
-    
-    // Auto-load audio for the first section
-    this.updateAudioSource();
-
+    this.audio.addEventListener('timeupdate', () => this.currentTime.set(this.audio.currentTime));
+    this.audio.addEventListener('durationchange', () => this.duration.set(this.audio.duration));
+    this.audio.addEventListener('ended', () => this.isPlaying.set(false));
   }
 
   setActiveSection(section: LessonSection) {
@@ -505,33 +343,37 @@ export class LessonPlayerComponent implements OnInit {
 
   private updateAudioSource() {
     const section = this.activeSection();
-    let audioFilename = section.audioUrl;
-    let vttFilename = '';
+    if (!section) return;
+
+    let audioUrl = section.audioUrl;
+    let vttUrl = '';
 
     if (section.type === 'story' && section.stories) {
       const story = section.stories[this.activeStoryIndex()];
-      audioFilename = story.audioUrl;
-      vttFilename = story.vttUrl || '';
+      audioUrl = story.audioUrl;
+      vttUrl = story.vttUrl || '';
     }
 
-    if (audioFilename) {
-      this.audio.src = this.mediaService.getMediaUrl('audio', audioFilename);
+    if (audioUrl) {
+      this.audio.src = this.getMediaUrl(audioUrl);
       this.audio.load();
-      if (this.isPlaying()) {
-        this.audio.play();
-      }
+      if (this.isPlaying()) this.audio.play();
     }
 
-    if (vttFilename) {
-      this.mediaService.fetchAndParseVtt(vttFilename).subscribe(sentences => {
-        const section = this.activeSection();
+    if (vttUrl) {
+      this.mediaService.fetchAndParseVtt(vttUrl).subscribe(sentences => {
         if (section.stories) {
           section.stories[this.activeStoryIndex()].sentences = sentences;
-          // Trigger signal update if necessary (sections is a signal)
-          this.sections.update(s => [...s]);
         }
       });
     }
+  }
+
+  getMediaUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    // Assume path is like 'course/lesson/file.mp3'
+    return `${environment.apiBaseUrl}/media/${path}`;
   }
 
   togglePlay() {
@@ -546,9 +388,7 @@ export class LessonPlayerComponent implements OnInit {
   seekAudio(time: number) {
     this.audio.currentTime = time;
     this.currentTime.set(time);
-    if (!this.isPlaying()) {
-      this.togglePlay();
-    }
+    if (!this.isPlaying()) this.togglePlay();
   }
 
   onProgressBarClick(event: MouseEvent) {
@@ -556,15 +396,12 @@ export class LessonPlayerComponent implements OnInit {
     const rect = el.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const percentage = x / rect.width;
-    const time = percentage * this.duration();
-    this.seekAudio(time);
+    this.seekAudio(percentage * this.duration());
   }
 
   cyclePlaybackSpeed() {
     const speeds = [1, 1.25, 1.5, 2, 0.75];
-    const current = this.playbackSpeed();
-    const nextIndex = (speeds.indexOf(current) + 1) % speeds.length;
-    const nextSpeed = speeds[nextIndex];
+    const nextSpeed = speeds[(speeds.indexOf(this.playbackSpeed()) + 1) % speeds.length];
     this.playbackSpeed.set(nextSpeed);
     this.audio.playbackRate = nextSpeed;
   }
@@ -574,13 +411,5 @@ export class LessonPlayerComponent implements OnInit {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  isCompleted(id: string) {
-    return this.completedSections().has(id);
-  }
-
-  goBack() {
-    this.router.navigate(['/learner/courses', '1']); // Mock ID
   }
 }

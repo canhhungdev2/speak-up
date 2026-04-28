@@ -17,7 +17,18 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'courses/edit/:slug', component: AdminCourseEditComponent },
       { path: 'courses/:courseSlug/lessons', component: AdminLessonListComponent },
       { path: 'courses/:courseSlug/lessons/new', component: AdminLessonEditComponent },
-      { path: 'courses/:courseSlug/lessons/edit/:lessonSlug', component: AdminLessonEditComponent },
+      { 
+        path: 'courses/:courseSlug/lessons/edit/:lessonSlug', 
+        component: AdminLessonEditComponent,
+        children: [
+          { path: 'article', loadComponent: () => import('./lessons/sections/admin-lesson-article.component').then(m => m.AdminLessonArticleComponent) },
+          { path: 'vocabulary', loadComponent: () => import('./lessons/sections/admin-lesson-vocabulary.component').then(m => m.AdminLessonVocabularyComponent) },
+          { path: 'mini-story', loadComponent: () => import('./lessons/sections/admin-lesson-mini-story.component').then(m => m.AdminLessonMiniStoryComponent) },
+          { path: 'pov', loadComponent: () => import('./lessons/sections/admin-lesson-pov.component').then(m => m.AdminLessonPovComponent) },
+          { path: 'commentary', loadComponent: () => import('./lessons/sections/admin-lesson-commentary.component').then(m => m.AdminLessonCommentaryComponent) },
+          { path: '', redirectTo: 'article', pathMatch: 'full' }
+        ]
+      },
     ]
   },
 ];

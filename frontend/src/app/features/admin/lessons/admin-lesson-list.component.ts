@@ -47,8 +47,6 @@ import { map, switchMap, tap } from 'rxjs';
                             <th class="px-8 py-5 w-16"></th>
                             <th class="px-8 py-5">Thứ tự</th>
                             <th class="px-8 py-5">Tiêu đề bài học</th>
-                            <th class="px-8 py-5">Loại</th>
-                            <th class="px-8 py-5">Thời lượng</th>
                             <th class="px-8 py-5 text-right">Hành động</th>
                         </tr>
                     </thead>
@@ -71,19 +69,6 @@ import { map, switchMap, tap } from 'rxjs';
                                         <span class="text-[10px] text-gray-400 tabular-nums">{{ lesson.slug }}</span>
                                     </div>
                                 </td>
-                                <td class="px-8 py-5">
-                                    <div class="flex items-center gap-2">
-                                        <div [ngSwitch]="lesson.type" class="w-8 h-8 rounded-lg flex items-center justify-center">
-                                            <svg *ngSwitchCase="'video'" class="w-5 h-5 text-rose-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm10 2a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1V9a1 1 0 00-1-1h-2z"/></svg>
-                                            <svg *ngSwitchCase="'audio'" class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.13a4.499 4.499 0 00-7 3.37c0 2.485 2.015 4.5 4.5 4.5S8 21.485 8 19V5l10-2v12.13a4.499 4.499 0 00-7 3.37c0 2.485 2.015 4.5 4.5 4.5S20 18.485 20 16V4a1 1 0 00-.5-.866z"/></svg>
-                                            <svg *ngSwitchDefault class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 4.804A7.993 7.993 0 0112 4a8 8 0 018 8c0 4.418-3.582 8-8 8a8.001 8.001 0 01-4.5-1.413A7.993 7.993 0 014 20c-1.105 0-2-.895-2-2 0-1.105.895-2 2-2 1.105 0 2 .895 2 2h2.804A7.993 7.993 0 019 4.804z"/></svg>
-                                        </div>
-                                        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 capitalize">{{ lesson.type }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-5">
-                                    <span class="text-sm font-bold text-gray-500 dark:text-gray-400 tabular-nums">{{ lesson.duration }}s</span>
-                                </td>
                                 <td class="px-8 py-5 text-right">
                                     <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button [routerLink]="['edit', lesson.slug]" 
@@ -103,7 +88,7 @@ import { map, switchMap, tap } from 'rxjs';
                             </tr>
                         } @empty {
                             <tr>
-                                <td colspan="6" class="px-8 py-20 text-center">
+                                <td colspan="4" class="px-8 py-20 text-center">
                                     <div class="flex flex-col items-center gap-4">
                                         <div class="w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center text-gray-200 dark:text-gray-700">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">

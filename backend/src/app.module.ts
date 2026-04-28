@@ -10,6 +10,7 @@ import { Vocabulary } from './entities/vocabulary.entity';
 import { MediaModule } from './modules/media/media.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { LessonsModule } from './modules/lessons/lessons.module';
+import { VocabularyModule } from './modules/vocabulary/vocabulary.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { LessonsModule } from './modules/lessons/lessons.module';
     }),
     CoursesModule,
     LessonsModule,
+    VocabularyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

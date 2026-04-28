@@ -46,27 +46,32 @@ export class Course {
 ```
 
 ### `Lesson` (Bảng `lessons`)
-Lưu trữ các bài học thuộc một khóa học.
+Lưu trữ các bài học thuộc một khóa học. Mỗi bài học bao gồm nhiều thành phần (Main, Vocab, POV, Commentary, Mini Stories).
 - `course_id`: Khóa ngoại liên kết với bảng `courses`.
 - `title`: Tên bài học.
-- `type`: Loại bài học (`video`, `audio`, `story`, `quiz`).
-- `content_url`: Đường dẫn đến file media (video/audio) trên Supabase Storage.
-- `content_bilingual`: Dữ liệu bài đọc song ngữ (JSONB), lưu các cặp đoạn văn Anh - Việt.
-- `duration`: Thời lượng của bài học (tính bằng giây).
+- `main_audio_url`: URL file audio bài học chính.
+- `main_content_bilingual`: Dữ liệu bài đọc song ngữ (JSONB).
+- `vocab_audio_url`: URL file audio phần từ vựng.
+- `mini_stories`: Danh sách các câu chuyện mini (JSONB array). Mỗi item gồm `{audio_url, vtt_url, title}`.
+- `pov_audio_url`, `pov_vtt_url`: Audio và phụ đề cho phần Point of View.
+- `commentary_audio_url`, `commentary_vtt_url`: Audio và phụ đề cho phần Commentary.
 - `order_index`: Thứ tự của bài học trong khóa học.
-- `slug`: Đường dẫn thân thiện (ví dụ: `the-turtle-story`). Duy nhất và được đánh chỉ mục.
+- `slug`: Đường dẫn thân thiện.
 
 ```typescript
 @Entity('lessons')
 export class Lesson {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column('uuid') course_id: string;
-  @ManyToOne(() => Course) course: Course;
   @Column() title: string;
-  @Column() type: string;           
-  @Column() content_url: string;
-  @Column({ type: 'jsonb' }) content_bilingual: { en: string; vi: string; }[];
-  @Column() duration: number;
+  @Column() main_audio_url: string;
+  @Column({ type: 'jsonb' }) main_content_bilingual: { en: string; vi: string; }[];
+  @Column() vocab_audio_url: string;
+  @Column({ type: 'jsonb' }) mini_stories: { audio_url: string; vtt_url: string; title?: string }[];
+  @Column() pov_audio_url: string;
+  @Column() pov_vtt_url: string;
+  @Column() commentary_audio_url: string;
+  @Column() commentary_vtt_url: string;
   @Column() order_index: number;
   @Column({ unique: true }) @Index() slug: string;
 }

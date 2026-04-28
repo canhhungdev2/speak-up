@@ -57,35 +57,38 @@ async function seed() {
     {
       course_id: originalEnglish.id,
       title: 'Day Of The Dead',
-      type: 'story',
-      duration: 300,
       order_index: 1,
-      content_url: 'story1.mp3',
-      content_bilingual: [
+      main_audio_url: 'story1.mp3',
+      main_content_bilingual: [
         { en: 'I arrive in Guatemala on The Day of the Dead, November 1st.', vi: 'Tôi đến Guatemala vào Ngày lễ người chết, ngày 1 tháng 11.' },
         { en: 'I am curious about this holiday, so I go to the cemetery to see what\'s happening.', vi: 'Tôi tò mò về ngày lễ này, vì vậy tôi đi đến nghĩa trang để xem điều gì đang xảy ra.' },
         { en: 'What I find is quite interesting. The atmosphere is like a party.', vi: 'Những gì tôi thấy khá thú vị. Không khí giống như một bữa tiệc.' }
-      ]
+      ],
+      vocab_audio_url: 'vocab.mp3',
+      mini_stories: [
+        { id: 'ms1', title: 'Mini Story 1', audio_url: 'ms1.mp3', vtt_url: 'ms1.vtt' },
+        { id: 'ms2', title: 'Mini Story 2', audio_url: 'ms2.mp3', vtt_url: 'ms2.vtt' }
+      ],
+      pov_audio_url: 'pov.mp3',
+      pov_vtt_url: 'pov.vtt',
+      commentary_audio_url: 'commentary.mp3',
+      commentary_vtt_url: 'commentary.vtt'
     },
     {
       course_id: originalEnglish.id,
       title: 'A Kiss',
-      type: 'story',
-      duration: 600,
       order_index: 2,
-      content_url: 'story2.mp3',
-      content_bilingual: [
+      main_audio_url: 'story2.mp3',
+      main_content_bilingual: [
         { en: 'Carlos buys a new car. It\'s a very expensive car.', vi: 'Carlos mua một chiếc xe hơi mới. Đó là một chiếc xe rất đắt tiền.' }
       ]
     },
     {
       course_id: originalEnglish.id,
       title: 'The Weaver of Stars',
-      type: 'story',
-      duration: 420,
       order_index: 3,
-      content_url: 'story3.mp3',
-      content_bilingual: [
+      main_audio_url: 'story3.mp3',
+      main_content_bilingual: [
         { en: 'Once upon a time, there lived a young weaver named Elara.', vi: 'Ngày xửa ngày xưa, có một cô thợ dệt trẻ tuổi tên là Elara.' }
       ]
     }

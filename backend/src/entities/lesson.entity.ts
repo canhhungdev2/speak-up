@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
-import { slugify } from '../common/utils/slugify';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, JoinColumn, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { Course } from './course.entity';
 import { Vocabulary } from './vocabulary.entity';
+import { slugify } from '../common/utils/slugify';
 
 @Entity('lessons')
 export class Lesson {
@@ -18,24 +18,50 @@ export class Lesson {
   @Column()
   title: string;
 
-  @Column({ nullable: true })
-  type: string; // 'video' | 'audio' | 'story' | 'quiz'
-
-  @Column({ nullable: true })
-  content_url: string;
-
-  @Column({ type: 'jsonb', nullable: true })
-  content_bilingual: { en: string; vi: string; }[];
-
-  @Column({ nullable: true })
-  duration: number;
+  @Column({ unique: true })
+  @Index()
+  slug: string;
 
   @Column({ default: 0 })
   order_index: number;
 
-  @Column({ unique: true })
-  @Index()
-  slug: string;
+  // --- Main Article ---
+  @Column({ nullable: true })
+  main_audio_url: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  main_content_bilingual: { en: string; vi: string }[];
+
+  // --- Vocabulary ---
+  @Column({ nullable: true })
+  vocab_audio_url: string;
+
+  @OneToMany(() => Vocabulary, (v) => v.lesson)
+  vocabularies: Vocabulary[];
+
+  // --- Mini Stories ---
+  @Column({ type: 'jsonb', nullable: true })
+  mini_stories: { 
+    id: string;
+    audio_url: string; 
+    vtt_url: string; 
+    title?: string;
+    order_index?: number;
+  }[];
+
+  // --- Point Of View ---
+  @Column({ nullable: true })
+  pov_audio_url: string;
+
+  @Column({ nullable: true })
+  pov_vtt_url: string;
+
+  // --- Commentary ---
+  @Column({ nullable: true })
+  commentary_audio_url: string;
+
+  @Column({ nullable: true })
+  commentary_vtt_url: string;
 
   @BeforeInsert()
   @BeforeUpdate()
@@ -47,7 +73,4 @@ export class Lesson {
 
   @CreateDateColumn()
   created_at: Date;
-
-  @OneToMany(() => Vocabulary, (vocab) => vocab.lesson)
-  vocabularies: Vocabulary[];
 }

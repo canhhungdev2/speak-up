@@ -49,14 +49,7 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                   <div class="flex-grow">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">{{ lesson.title }}</h3>
                     <div class="flex items-center gap-4 mt-1">
-                        <span class="text-xs font-bold text-gray-400 flex items-center gap-1 uppercase tracking-wider">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                          </svg>
-                          {{ lesson.type }}
-                        </span>
-                        <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ lesson.duration }}</span>
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Bắt đầu học</span>
                     </div>
                   </div>
 
