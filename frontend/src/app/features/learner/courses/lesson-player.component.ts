@@ -85,11 +85,11 @@ interface LessonSection {
 
             @switch (activeSection().type) {
                 @case ('article') {
-                  <div class="space-y-8">
-                      @for (p of activeSection().paragraphs; track p.en) {
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 group border-b border-gray-100/50 dark:border-white/5 pb-8 last:border-0">
-                            <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-800 dark:text-slate-200 leading-relaxed tracking-tight" [innerHTML]="p.en"></div>
-                            <div class="prose prose-lg md:prose-xl dark:prose-invert max-w-none font-merriweather text-gray-500/80 dark:text-slate-400/80 italic border-l-2 border-gray-100 pl-8" [innerHTML]="p.vi"></div>
+                  <div class="space-y-6">
+                      @for (p of activeSection().paragraphs; track $index) {
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 group border-b border-gray-100/50 dark:border-white/5 pb-6 last:border-0">
+                            <div class="prose prose-lg md:prose-xl dark:prose-invert prose-p:m-0 max-w-none font-merriweather text-gray-800 dark:text-slate-200 leading-relaxed tracking-tight" [innerHTML]="p.en"></div>
+                            <div class="prose prose-lg md:prose-xl dark:prose-invert prose-p:m-0 max-w-none font-merriweather text-gray-500/80 dark:text-slate-400/80 italic border-l-2 border-gray-100 pl-8" [innerHTML]="p.vi"></div>
                         </div>
                       }
                   </div>
@@ -223,7 +223,10 @@ export class LessonPlayerComponent implements OnInit {
       icon: '📄',
       type: 'article',
       audioUrl: lesson.main_audio_url,
-      paragraphs: lesson.main_content_bilingual || []
+      paragraphs: (lesson.main_content_bilingual || []).filter((p: any) => {
+        const clean = (str: string) => str ? str.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/gi, '').replace(/&#160;/gi, '').trim() : '';
+        return clean(p.en) || clean(p.vi);
+      })
     });
 
     // 2. Vocabulary
