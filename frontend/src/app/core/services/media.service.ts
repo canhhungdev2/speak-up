@@ -16,7 +16,12 @@ export class MediaService {
   }
 
   fetchAndParseVtt(filename: string): Observable<StorySentence[]> {
-    const url = filename.startsWith('http') ? filename : `${this.baseUrl}/${filename}`;
+    let url = filename;
+    if (!filename.startsWith('http') && !filename.startsWith('/')) {
+       url = filename.includes('/') ? `${this.baseUrl}/${filename}` : `${this.baseUrl}/vtt/${filename}`;
+    } else if (filename.startsWith('/')) {
+       url = `${environment.apiBaseUrl}${filename}`;
+    }
     return this.http.get(url, { responseType: 'text' }).pipe(
       map(content => parseVtt(content))
     );

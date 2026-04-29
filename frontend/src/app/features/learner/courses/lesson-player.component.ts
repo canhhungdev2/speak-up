@@ -1,6 +1,6 @@
 import {
   Component, ChangeDetectionStrategy, signal, computed,
-  inject, effect, OnInit
+  inject, effect, OnInit, OnDestroy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
@@ -198,7 +198,7 @@ interface LessonSection {
     .font-merriweather { font-family: 'Merriweather', serif; }
   `]
 })
-export class LessonPlayerComponent implements OnInit {
+export class LessonPlayerComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private mediaService = inject(MediaService);
   private lessonService = inject(LessonService);
@@ -333,13 +333,23 @@ export class LessonPlayerComponent implements OnInit {
     this.audio.addEventListener('ended', () => this.isPlaying.set(false));
   }
 
+  ngOnDestroy() {
+    this.audio.pause();
+    this.audio.removeAttribute('src');
+    this.audio.load();
+  }
+
   setActiveSection(section: LessonSection) {
+    this.audio.pause();
+    this.isPlaying.set(false);
     this.activeSection.set(section);
     this.activeStoryIndex.set(0);
     this.updateAudioSource();
   }
 
   setActiveStory(index: number) {
+    this.audio.pause();
+    this.isPlaying.set(false);
     this.activeStoryIndex.set(index);
     this.updateAudioSource();
   }
@@ -360,7 +370,18 @@ export class LessonPlayerComponent implements OnInit {
     if (audioUrl) {
       this.audio.src = this.getMediaUrl(audioUrl);
       this.audio.load();
-      if (this.isPlaying()) this.audio.play();
+      if (this.isPlaying()) {
+        this.audio.play().catch(err => {
+          console.error('Audio autoplay failed', err);
+          this.isPlaying.set(false);
+        });
+      }
+    } else {
+      this.audio.pause();
+      this.audio.removeAttribute('src');
+      this.audio.load();
+      this.currentTime.set(0);
+      this.duration.set(0);
     }
 
     if (vttUrl) {
@@ -375,17 +396,26 @@ export class LessonPlayerComponent implements OnInit {
   getMediaUrl(path: string): string {
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    // Assume path is like 'course/lesson/file.mp3'
+    if (path.startsWith('/')) return `${environment.apiBaseUrl}${path}`;
+    
+    if (!path.includes('/')) {
+      return `${environment.apiBaseUrl}/media/audio/${path}`;
+    }
     return `${environment.apiBaseUrl}/media/${path}`;
   }
 
   togglePlay() {
     if (this.isPlaying()) {
       this.audio.pause();
+      this.isPlaying.set(false);
     } else {
-      this.audio.play();
+      this.audio.play().then(() => {
+        this.isPlaying.set(true);
+      }).catch(err => {
+        console.error('Playback failed', err);
+        this.isPlaying.set(false);
+      });
     }
-    this.isPlaying.set(!this.isPlaying());
   }
 
   seekAudio(time: number) {
