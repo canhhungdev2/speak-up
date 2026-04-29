@@ -16,7 +16,10 @@ export class CoursesService {
   async findAll() {
     const courses = await this.courseRepository.find({
       relations: ['lessons'],
-      order: { order_index: 'ASC' },
+      order: { 
+        order_index: 'ASC',
+        lessons: { order_index: 'ASC' }
+      },
     });
 
     return courses.map(course => ({
@@ -29,6 +32,9 @@ export class CoursesService {
     const course = await this.courseRepository.findOne({
       where: { id },
       relations: ['lessons'],
+      order: {
+        lessons: { order_index: 'ASC' }
+      }
     });
 
     if (!course) {
@@ -42,6 +48,9 @@ export class CoursesService {
     const course = await this.courseRepository.findOne({
       where: { slug },
       relations: ['lessons'],
+      order: {
+        lessons: { order_index: 'ASC' }
+      }
     });
 
     if (!course) {

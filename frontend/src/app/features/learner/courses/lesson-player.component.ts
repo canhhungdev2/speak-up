@@ -153,7 +153,7 @@ interface LessonSection {
           </div>
       </main>
 
-      <footer class="fixed bottom-0 left-0 right-0 h-24 bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-2xl border-t border-gray-100 dark:border-white/5 z-[110] px-4 md:px-10 flex items-center">
+      <footer class="absolute bottom-0 left-0 right-0 h-24 bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-2xl border-t border-gray-100 dark:border-white/5 z-[40] px-4 md:px-10 flex items-center">
           <div class="max-w-7xl mx-auto w-full flex items-center gap-4 md:gap-12">
             <div class="hidden sm:flex items-center gap-4 w-64 shrink-0">
                 <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center text-2xl">{{ activeSection().icon }}</div>
