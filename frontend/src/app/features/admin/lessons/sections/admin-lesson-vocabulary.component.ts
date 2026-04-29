@@ -121,10 +121,17 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
                     </div>
                   </div>
 
-                  <!-- Translation (Vietnamese) -->
+                  <!-- Translation (Short Vietnamese Meaning) -->
                   <div class="space-y-2">
                     <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Translation (Vietnamese)</label>
-                    <input type="text" formControlName="definition_vi" placeholder="Vietnamese meaning"
+                    <input type="text" formControlName="translation" placeholder="Nghĩa ngắn gọn..."
+                           class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-primary/20 transition-all outline-none">
+                  </div>
+
+                  <!-- Definition VI -->
+                  <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Detailed Definition (Vietnamese)</label>
+                    <input type="text" formControlName="definition_vi" placeholder="Giải nghĩa chi tiết..."
                            class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-primary/20 transition-all outline-none">
                   </div>
 
@@ -159,8 +166,9 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Từ vựng</th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Phiên âm</th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Loại từ</th>
-                  <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Định nghĩa (EN)</th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Nghĩa (VI)</th>
+                  <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Định nghĩa (EN)</th>
+                  <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Giải nghĩa (VI)</th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Thao tác</th>
                 </tr>
               </thead>
@@ -182,10 +190,13 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
                     <td class="px-6 py-4">
                       <span class="px-2 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded text-[10px] font-black uppercase tracking-tight">{{ v.word_type }}</span>
                     </td>
+                    <td class="px-6 py-4 text-sm text-emerald-600 dark:text-emerald-400 font-bold max-w-[150px]">
+                      <div class="line-clamp-2" [title]="v.translation">{{ v.translation }}</div>
+                    </td>
                     <td class="px-6 py-4 text-sm text-gray-500 max-w-[200px]">
                       <div class="line-clamp-2" [title]="v.definition">{{ v.definition }}</div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-emerald-600 dark:text-emerald-400 font-bold max-w-[200px]">
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-[200px]">
                       <div class="line-clamp-2" [title]="v.definition_vi">{{ v.definition_vi }}</div>
                     </td>
                     <td class="px-6 py-4">
@@ -246,6 +257,7 @@ export class AdminLessonVocabularyComponent implements OnInit {
     term: ['', [Validators.required]],
     ipa: [''],
     definition: ['', [Validators.required]],
+    translation: [''],
     definition_vi: [''],
     example: [''],
     word_type: [''],
@@ -313,6 +325,7 @@ export class AdminLessonVocabularyComponent implements OnInit {
           ipa: details.phonetic || details.phonetics.find(p => p.text)?.text || '',
           word_type: pos || 'noun',
           definition: details.meanings[0]?.definitions[0]?.definition || '',
+          translation: details.translation || '',
           definition_vi: details.definition_vi || '',
           example: details.meanings[0]?.definitions[0]?.example || '',
           audio_url: audio

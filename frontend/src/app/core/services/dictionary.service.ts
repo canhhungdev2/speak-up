@@ -15,6 +15,7 @@ export interface DictionaryEntry {
       antonyms: string[];
     }[];
   }[];
+  translation?: string;
   definition_vi?: string;
 }
 
@@ -28,21 +29,54 @@ export class DictionaryService {
 
   fetchWordDetails(word: string): Observable<DictionaryEntry | null> {
     if (!word?.trim()) return of(null);
+    const cleanWord = word.trim().toLowerCase();
 
-    return this.http.get<DictionaryEntry[]>(`${this.apiUrl}/${word.trim().toLowerCase()}`).pipe(
+    return this.http.get<DictionaryEntry[]>(`${this.apiUrl}/${encodeURIComponent(cleanWord)}`).pipe(
       map(entries => (entries && entries.length > 0 ? entries[0] : null)),
       concatMap(entry => {
-        if (!entry) return of(null);
+        if (!entry) return this.fallbackTranslation(cleanWord);
         
         const firstDef = entry.meanings[0]?.definitions[0]?.definition;
-        if (!firstDef) return of(entry);
+        
+        const wordTranslation$ = this.translateToVietnamese(cleanWord);
+        const defTranslation$ = firstDef ? this.translateToVietnamese(firstDef) : of('');
 
-        return this.translateToVietnamese(firstDef).pipe(
-          map(translation => ({
+        return forkJoin({
+          wordTrans: wordTranslation$,
+          defTrans: defTranslation$
+        }).pipe(
+          map(({ wordTrans, defTrans }) => ({
             ...entry,
-            definition_vi: translation
+            translation: wordTrans,
+            definition_vi: defTrans
           }))
         );
+      }),
+      catchError(() => this.fallbackTranslation(cleanWord))
+    );
+  }
+
+  private fallbackTranslation(word: string): Observable<DictionaryEntry | null> {
+    return this.translateToVietnamese(word).pipe(
+      map(translation => {
+        return {
+          word: word,
+          phonetics: [],
+          meanings: [
+            {
+              partOfSpeech: word.includes(' ') ? 'phrase' : 'noun',
+              definitions: [
+                {
+                  definition: 'Phrase / Expression',
+                  synonyms: [],
+                  antonyms: []
+                }
+              ]
+            }
+          ],
+          translation: translation || '',
+          definition_vi: 'Cụm từ / Thành ngữ'
+        } as DictionaryEntry;
       }),
       catchError(() => of(null))
     );

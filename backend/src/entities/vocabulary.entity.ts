@@ -23,6 +23,9 @@ export class Vocabulary {
   definition: string;
 
   @Column({ type: 'text', nullable: true })
+  translation: string;
+
+  @Column({ type: 'text', nullable: true })
   definition_vi: string;
 
   @Column({ type: 'text', nullable: true })

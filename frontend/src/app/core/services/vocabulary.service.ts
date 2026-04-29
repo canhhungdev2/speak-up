@@ -9,6 +9,7 @@ export interface Vocabulary {
   term: string;
   ipa?: string;
   definition: string;
+  translation?: string;
   definition_vi?: string;
   example?: string;
   word_type?: string;

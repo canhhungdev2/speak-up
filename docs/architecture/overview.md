@@ -2,13 +2,13 @@
 
 ## Stack Công nghệ
 
-| Tầng | Công nghệ | Ghi chú |
-|---|---|---|
+| Tầng         | Công nghệ               | Ghi chú                       |
+| ------------ | ----------------------- | ----------------------------- |
 | **Frontend** | Angular 21 (Standalone) | Tailwind CSS, Angular Signals |
-| **Backend** | NestJS | REST API |
-| **Database** | PostgreSQL (Supabase) | TypeORM |
-| **Auth** | Supabase Auth | JWT-based |
-| **Storage** | Supabase Storage | Media files |
+| **Backend**  | NestJS                  | REST API                      |
+| **Database** | PostgreSQL (Supabase)   | TypeORM                       |
+| **Auth**     | Supabase Auth           | JWT-based                     |
+| **Storage**  | Supabase Storage        | Media files                   |
 
 ## Sơ đồ Kiến trúc
 
@@ -26,7 +26,7 @@
 ┌───────────────────────────────────┐
 │          Backend (NestJS)         │
 │                                   │
-│  Auth │ Courses │ Vocab │ Progress │
+│ Auth │ Courses │ Vocab │ Progress │
 └───────────────────┬───────────────┘
                     │ TypeORM
                     ▼
@@ -66,8 +66,8 @@ frontend/src/app/
 
 ## Phân quyền Người dùng
 
-| Role | Quyền truy cập |
-|---|---|
-| `guest` | Landing page, Register |
+| Role      | Quyền truy cập                       |
+| --------- | ------------------------------------ |
+| `guest`   | Landing page, Register               |
 | `learner` | `/learner/*` — toàn bộ giao diện học |
-| `admin` | `/admin/*` — quản lý nội dung |
+| `admin`   | `/admin/*` — quản lý nội dung        |
