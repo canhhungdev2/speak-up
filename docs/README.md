@@ -13,10 +13,11 @@ docs/
 │   ├── 01-authentication.md     # Xác thực người dùng
 │   ├── 02-learner-dashboard.md  # Bảng điều khiển học viên
 │   ├── 03-04-courses-and-lessons.md # Khóa học và Bài học
-│   ├── 05-vocabulary.md         # Quản lý từ vựng
+│   ├── 05-vocabulary.md         # Quản lý từ vựng (Learner)
 │   ├── 06-srs-study.md          # Hệ thống ôn tập SRS
 │   ├── 07-admin-panel.md        # Hệ thống quản trị (Admin)
-│   └── 08-lesson-player.md      # Màn hình học bài (Song ngữ)
+│   ├── 08-lesson-player.md      # Màn hình học bài (Song ngữ)
+│   └── 10-media-streaming.md    # Hệ thống truyền phát media
 ├── database/
 │   └── schema.md                # Mô tả schema database (TypeORM)
 └── workflow.md                  # Quy trình bảo trì tài liệu
@@ -35,9 +36,17 @@ docs/
 |---|---|---|
 | Authentication | 🚧 Mock | Chưa kết nối Supabase |
 | Learner Dashboard | ✅ UI hoàn chỉnh | Dữ liệu tĩnh |
-| Course List | ✅ UI hoàn chỉnh | Dữ liệu tĩnh |
-| Lesson List | ✅ UI hoàn chỉnh | Dữ liệu tĩnh |
+| Course List | ✅ Hoàn thiện | Dữ liệu thật từ API, sắp xếp theo `order_index` |
+| Lesson List | ✅ Hoàn thiện | Dữ liệu thật từ API, thứ tự theo Admin |
 | My Vocabulary | ✅ UI hoàn chỉnh | Dữ liệu tĩnh |
 | SRS Study (Flashcard) | ✅ Hoàn thiện UI | Đã thêm animation & TTS cao cấp |
-| Admin Panel | ✅ Cơ bản hoàn thiện | Đã có Dashboard, Quản lý khóa học & bài học (Drag & Drop) |
-| Lesson Player | ✅ Hoàn thiện UI | Giao diện song ngữ Anh - Việt |
+| Admin Panel | ✅ Hoàn thiện | Dashboard, CRUD khóa học/bài học, Vocabulary Drag & Drop |
+| Lesson Player | ✅ Hoàn thiện | Song ngữ, audio lifecycle, mobile drawer, vocab phát âm |
+| Media Streaming | ✅ Hoàn thiện | Upload/serve media, path normalization, legacy support |
+
+## Cập nhật gần nhất
+- **2026-04-30**: Cập nhật toàn bộ tài liệu phản ánh các tính năng mới:
+  - Vocabulary: thêm `translation`, `definition_vi`, `order_index`, kéo thả sắp xếp
+  - Lesson Player: mobile sidebar drawer, phát âm từ vựng, quản lý vòng đời audio
+  - Media: chuẩn hóa đường dẫn (Windows path, JSON parsing), thumbnail tên cố định
+  - Admin: Course thumbnail upload fix, Vocabulary drag & drop reorder
