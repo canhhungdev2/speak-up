@@ -37,6 +37,9 @@ export class Vocabulary {
   @Column({ nullable: true })
   audio_url: string;
 
+  @Column({ default: 0 })
+  order_index: number;
+
   @CreateDateColumn()
   created_at: Date;
 }

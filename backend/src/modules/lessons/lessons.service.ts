@@ -22,6 +22,9 @@ export class LessonsService {
     const lesson = await this.lessonRepository.findOne({
       where: { id },
       relations: ['course', 'vocabularies'],
+      order: {
+        vocabularies: { order_index: 'ASC' }
+      }
     });
     if (!lesson) throw new NotFoundException(`Lesson with ID "${id}" not found`);
     return lesson;
@@ -34,6 +37,9 @@ export class LessonsService {
         course: { slug: courseSlug }
       },
       relations: ['course', 'vocabularies'],
+      order: {
+        vocabularies: { order_index: 'ASC' }
+      }
     });
 
     if (!lesson) {

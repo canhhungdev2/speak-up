@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ActivatedRoute } from '@angular/router';
 import { LessonEditService } from '../lesson-edit.service';
 import { VocabularyService, Vocabulary } from '../../../../core/services/vocabulary.service';
@@ -11,7 +12,7 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
 @Component({
   selector: 'app-admin-lesson-vocabulary',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AdminAudioUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, AdminAudioUploadComponent, DragDropModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-in slide-in-from-right-10 duration-500">
@@ -163,6 +164,7 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="bg-gray-50 dark:bg-white/5">
+                  <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest"></th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Từ vựng</th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Phiên âm</th>
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Loại từ</th>
@@ -172,9 +174,19 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
                   <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Thao tác</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100 dark:divide-white/5">
+              <tbody class="divide-y divide-gray-100 dark:divide-white/5" 
+                     cdkDropList 
+                     (cdkDropListDropped)="onDrop($event)">
                 @for (v of vocabularies(); track v.id) {
-                  <tr class="hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors">
+                  <tr class="hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors group" cdkDrag>
+                    <!-- Drag Handle -->
+                    <td class="px-4 py-4 w-10">
+                      <div class="cursor-move text-gray-300 hover:text-primary transition-colors" cdkDragHandle>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                        </svg>
+                      </div>
+                    </td>
                     <td class="px-6 py-4">
                       <div class="flex items-center gap-3">
                         <span class="font-bold text-gray-900 dark:text-white">{{ v.term }}</span>
@@ -383,5 +395,30 @@ export class AdminLessonVocabularyComponent implements OnInit {
   onSave() {
     if (this.vocabForm.invalid) return;
     this.lessonEditService.saveSection(this.vocabForm.value as any).subscribe();
+  }
+
+  onDrop(event: CdkDragDrop<Vocabulary[]>) {
+    const list = [...this.vocabularies()];
+    moveItemInArray(list, event.previousIndex, event.currentIndex);
+    
+    // Update UI immediately
+    this.vocabularies.set(list);
+
+    // Save new order to backend
+    const orderData = list.map((item, index) => ({
+      id: item.id,
+      order_index: index
+    }));
+
+    this.vocabularyService.reorder(orderData).subscribe({
+      error: (err) => {
+        console.error('Reorder failed:', err);
+        // Revert if failed
+        const lessonId = this.lessonEditService.lesson()?.id;
+        if (lessonId) {
+          this.loadVocabularies(lessonId);
+        }
+      }
+    });
   }
 }

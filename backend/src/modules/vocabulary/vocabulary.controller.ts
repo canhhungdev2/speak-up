@@ -16,6 +16,11 @@ export class VocabularyController {
     return this.vocabularyService.findByLesson(lessonId);
   }
 
+  @Patch('reorder')
+  reorder(@Body() orderData: { id: string, order_index: number }[]) {
+    return this.vocabularyService.reorder(orderData);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() data: Partial<Vocabulary>) {
     return this.vocabularyService.update(id, data);

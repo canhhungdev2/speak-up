@@ -34,7 +34,14 @@ export class VocabularyService {
   async findByLesson(lessonId: string) {
     return this.vocabularyRepository.find({
       where: { lesson_id: lessonId },
-      order: { created_at: 'ASC' }
+      order: { order_index: 'ASC' }
     });
+  }
+
+  async reorder(orderData: { id: string, order_index: number }[]) {
+    const promises = orderData.map(item => 
+      this.vocabularyRepository.update(item.id, { order_index: item.order_index })
+    );
+    return Promise.all(promises);
   }
 }

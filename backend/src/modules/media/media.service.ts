@@ -14,7 +14,8 @@ export class MediaService {
   }
 
   async saveCourseThumbnail(courseSlug: string, file: Express.Multer.File): Promise<{ url: string }> {
-    const relativePath = join('courses', courseSlug, `thumbnail-${Date.now()}${this.getExtension(file.originalname)}`);
+    const filename = `thumbnail${this.getExtension(file.originalname)}`;
+    const relativePath = join('courses', courseSlug, filename);
     const fullPath = join(this.storagePath, relativePath);
     
     // Ensure directory exists
@@ -26,8 +27,6 @@ export class MediaService {
     // Save file
     writeFileSync(fullPath, file.buffer);
 
-    // Return only the relative path to be stored in DB
-    const filename = relativePath.split(/[\\/]/).pop();
     return {
       url: `/media/courses/${courseSlug}/thumbnail/${filename}`
     };

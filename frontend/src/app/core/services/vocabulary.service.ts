@@ -39,4 +39,8 @@ export class VocabularyService {
   findByLesson(lessonId: string): Observable<Vocabulary[]> {
     return this.http.get<Vocabulary[]>(`${this.apiUrl}/lesson/${lessonId}`);
   }
+
+  reorder(orderData: { id: string; order_index: number }[]): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/reorder`, orderData);
+  }
 }
