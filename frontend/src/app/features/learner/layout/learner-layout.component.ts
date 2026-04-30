@@ -129,12 +129,12 @@ import { SidebarService } from '../../../core/services/sidebar.service';
               </svg>
            </div>
            <div *ngIf="sidebarService.isSlim()" class="flex items-center gap-3 animate-in fade-in duration-500">
-              <button (click)="onBack.emit()" class="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all">
+              <button *ngIf="showBackButton" (click)="onBack.emit()" class="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </button>
-              <h2 class="text-xl font-black text-gray-900 dark:text-white font-outfit truncate max-w-[200px] md:max-w-md">{{ title }}</h2>
+              <h2 *ngIf="title" class="text-xl font-black text-gray-900 dark:text-white font-outfit truncate max-w-[200px] md:max-w-md">{{ title }}</h2>
            </div>
 
            <!-- Mobile Menu Toggle -->
@@ -182,6 +182,7 @@ export class LearnerLayoutComponent implements OnInit {
     this.sidebarService.setSlim(value);
   }
   @Input() title = '';
+  @Input() showBackButton = false;
   @Output() onBack = new EventEmitter<void>();
 
   themeService = inject(ThemeService);

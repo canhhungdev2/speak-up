@@ -10,18 +10,39 @@ export class MediaUrlPipe implements PipeTransform {
 
   transform(value: string | undefined | null): string {
     if (!value) return '';
+
+    let cleanValue = value.trim();
+    
+    // Safety check: Handle case where data was accidentally saved as a JSON string (e.g. {"url":"..."})
+    if (cleanValue.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(cleanValue);
+        if (parsed.url) cleanValue = parsed.url;
+      } catch (e) {
+        // Not a valid JSON, continue with original value
+      }
+    }
     
     // If it's already a full URL, return as is
-    if (value.startsWith('http')) {
-      return value;
+    if (cleanValue.startsWith('http')) {
+      return cleanValue;
     }
     
-    // If it starts with /media, prepend baseUrl
-    if (value.startsWith('/media')) {
-      return `${this.baseUrl}${value}`;
+    // Normalize backslashes to forward slashes (important for Windows-saved paths)
+    let path = cleanValue.replace(/\\/g, '/');
+    
+    // If it starts with /media or /, prepend baseUrl if needed
+    if (path.startsWith('/media') || path.startsWith('/')) {
+      if (!path.startsWith('/')) path = '/' + path;
+      return `${this.baseUrl}${path}`;
     }
     
-    // Default fallback
-    return value;
+    // If it's a relative path like "courses/xxx/yyy.jpg", prepend /media/
+    if (path.includes('/')) {
+      return `${this.baseUrl}/media/${path}`;
+    }
+
+    // Default fallback (e.g. "story1.mp3"), assume it's in audio/
+    return `${this.baseUrl}/media/audio/${path}`;
   }
 }

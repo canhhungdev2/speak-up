@@ -74,6 +74,19 @@ interface LessonSection {
       <main class="flex-grow overflow-y-auto p-4 md:p-12 bg-gray-50 dark:bg-transparent relative scrollbar-hide">
           <div class="max-w-6xl mx-auto pb-40 md:pb-32">
             
+            <!-- Mobile Section Selector Toggle -->
+            <div class="lg:hidden mb-8 flex items-center justify-between">
+                <button (click)="isMobileSidebarOpen.set(true)" 
+                        class="flex items-center gap-3 px-5 py-3 bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:border-primary/30 transition-all">
+                    <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </div>
+                    <span class="text-sm font-bold text-gray-700 dark:text-slate-300">Nội dung bài học</span>
+                </button>
+            </div>
+            
             <div class="mb-8 md:mb-12">
                 <span class="px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full mb-4 inline-block">
                   {{ activeSection().type }}
@@ -96,13 +109,34 @@ interface LessonSection {
                 }
                 @case ('vocab') {
                   <div class="space-y-6">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         @for (vocab of lesson.vocabularies; track vocab.id) {
-                            <div class="p-6 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-[2rem] hover:border-primary/30 transition-all group">
-                                <h3 class="text-xl font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors">{{ vocab.term }}</h3>
-                                <p class="text-gray-400 text-sm mb-1">{{ vocab.ipa }} | {{ vocab.word_type }}</p>
-                                <p class="text-gray-500 dark:text-slate-400 font-medium">{{ vocab.definition }}</p>
-                                <p class="mt-3 text-xs italic text-gray-400">"{{ vocab.example }}"</p>
+                            <div class="p-5 md:p-6 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl md:rounded-[1.5rem] hover:border-primary/30 hover:shadow-sm transition-all group">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-baseline gap-2 flex-wrap">
+                                        <h3 class="text-xl md:text-2xl font-black text-primary">{{ vocab.term }}</h3>
+                                        <span class="text-sm md:text-base text-gray-400 dark:text-slate-500 font-medium">{{ vocab.ipa }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 shrink-0 text-gray-400 dark:text-slate-500">
+                                        <button class="hover:text-rose-500 transition-colors" title="Thêm vào yêu thích">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                            </svg>
+                                        </button>
+                                        <button (click)="playVocabAudio(vocab)" class="hover:text-blue-500 transition-colors" title="Nghe phát âm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 10v4a2 2 0 002 2h2l5 5V3l-5 5H7a2 2 0 00-2 2z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-lg md:text-xl font-bold text-gray-800 dark:text-slate-200 mb-4">{{ vocab.translation || vocab.definition }}</p>
+                                <div class="border-l-[3px] border-gray-200 dark:border-white/10 pl-3 md:pl-4">
+                                    <p class="text-sm md:text-base text-gray-600 dark:text-slate-400">
+                                        <span class="font-bold text-gray-700 dark:text-slate-300 mr-1">Example:</span> 
+                                        {{ vocab.example }}
+                                    </p>
+                                </div>
                             </div>
                         }
                       </div>
@@ -190,6 +224,49 @@ interface LessonSection {
             </div>
           </div>
       </footer>
+
+      <!-- Mobile Sidebar Overlay -->
+      <div *ngIf="isMobileSidebarOpen()" 
+           class="fixed inset-0 z-[150] lg:hidden animate-in fade-in duration-300">
+          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="isMobileSidebarOpen.set(false)"></div>
+          <aside class="absolute left-0 top-0 bottom-0 w-[280px] sm:w-80 bg-white dark:bg-[#1e293b] shadow-2xl flex flex-col animate-in slide-in-from-left duration-500 ease-out">
+              <div class="p-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
+                  <div>
+                      <p class="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Học tập</p>
+                      <h3 class="text-lg font-black text-gray-900 dark:text-white font-outfit">Nội dung bài học</h3>
+                  </div>
+                  <button (click)="isMobileSidebarOpen.set(false)" class="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                  </button>
+              </div>
+              <nav class="p-4 space-y-2 overflow-y-auto scrollbar-hide flex-grow">
+                  @for (section of sections(); track section.id) {
+                      <button (click)="setActiveSection(section); isMobileSidebarOpen.set(false)"
+                              [class.bg-primary/10]="activeSection().id === section.id"
+                              [class.text-primary]="activeSection().id === section.id"
+                              class="w-full flex items-center gap-4 px-4 py-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all text-left group">
+                          <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center shrink-0"
+                                [class.bg-primary/20]="activeSection().id === section.id">
+                              <span class="text-xl">{{ section.icon }}</span>
+                          </div>
+                          <div class="min-w-0">
+                              <p class="font-bold text-sm truncate" [class.text-gray-900]="activeSection().id !== section.id" [class.dark:text-white]="activeSection().id !== section.id">
+                                  {{ section.title }}
+                              </p>
+                              <p class="text-[10px] text-gray-400 uppercase font-black tracking-wider">
+                                  {{ section.type }}
+                              </p>
+                          </div>
+                      </button>
+                  }
+              </nav>
+              <div class="p-6 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-white/5">
+                  <p class="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest">Tiến độ bài học: {{ progress() | number:'1.0-0' }}%</p>
+              </div>
+          </aside>
+      </div>
     </div>
   `,
   styles: [`
@@ -204,6 +281,7 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
   private lessonService = inject(LessonService);
 
   lessonData = signal<any>(null);
+  isMobileSidebarOpen = signal(false);
   activeStoryIndex = signal(0);
   isPlaying = signal(false);
   currentTime = signal(0);
@@ -416,6 +494,13 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
         this.isPlaying.set(false);
       });
     }
+  }
+
+  playVocabAudio(vocab: any) {
+    if (!vocab.audio_url) return;
+    const url = this.getMediaUrl(vocab.audio_url);
+    const audio = new Audio(url);
+    audio.play().catch(err => console.error('Vocab audio play failed', err));
   }
 
   seekAudio(time: number) {

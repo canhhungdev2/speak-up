@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, map } from 'rxjs';
 
 export interface Course {
   id: string;
@@ -39,9 +39,9 @@ export class CourseService {
   uploadThumbnail(courseSlug: string, file: File): Observable<string> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<string>(`${environment.apiBaseUrl}/media/upload/course-thumbnail/${courseSlug}`, formData, {
-      responseType: 'text' as 'json'
-    });
+    return this.http.post<{ url: string }>(`${environment.apiBaseUrl}/media/upload/course-thumbnail/${courseSlug}`, formData).pipe(
+      map(res => res.url)
+    );
   }
 
   create(course: Partial<Course>): Observable<Course> {
