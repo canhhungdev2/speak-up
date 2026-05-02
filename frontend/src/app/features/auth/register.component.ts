@@ -65,59 +65,53 @@ import { RouterModule } from '@angular/router';
         <div class="absolute bottom-[-100px] right-[-100px] w-96 h-96 bg-secondary/30 rounded-full blur-3xl"></div>
       </div>
 
-      <!-- Right Side: Registration Form -->
-      <div class="flex-1 flex flex-col justify-center p-8 md:p-20 bg-white">
-        <div class="max-w-md mx-auto w-full space-y-8">
-           <div class="text-center md:text-left">
-              <h2 class="text-3xl font-black text-gray-900">Tạo tài khoản mới</h2>
-              <p class="text-gray-500 mt-2">Hoàn toàn miễn phí, chỉ mất 30 giây.</p>
+      <!-- Right Side: Social Login Only -->
+      <div class="flex-1 flex flex-col justify-center p-8 md:p-20 bg-white relative">
+        <div class="max-w-md mx-auto w-full space-y-10 relative z-10">
+           <div class="text-center">
+              <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/5 rounded-2xl mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h2 class="text-4xl font-black text-gray-900 tracking-tight">Bắt đầu học ngay</h2>
+              <p class="text-gray-500 mt-3 text-lg">Tham gia cùng +10,000 học viên khác chỉ với một cú nhấp chuột.</p>
            </div>
 
-           <!-- Registration Form -->
-           <form class="space-y-4">
-              <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Họ và tên</label>
-                <input type="text" placeholder="Nhập tên của bạn" 
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Email</label>
-                <input type="email" placeholder="email@example.com" 
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Mật khẩu</label>
-                <input type="password" placeholder="••••••••" 
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
-              </div>
-              
-              <button type="button" routerLink="/learner/courses" class="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary-hover shadow-xl shadow-primary/20 transition-all transform active:scale-95">
-                Đăng ký ngay
+           <div class="space-y-4">
+              <!-- Google Login Button (Primary) -->
+              <button type="button" class="group relative w-full flex items-center justify-center gap-3 py-4 bg-white border-2 border-gray-100 rounded-2xl hover:border-primary/30 hover:bg-gray-50 transition-all duration-300 transform active:scale-[0.98] shadow-sm">
+                <img src="https://www.google.com/favicon.ico" class="w-5 h-5" alt="Google">
+                <span class="text-gray-700 font-bold text-lg">Tiếp tục với Google</span>
+                <div class="absolute inset-0 rounded-2xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
-           </form>
 
-           <div class="relative">
-              <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-100"></div></div>
-              <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-gray-400">Hoặc tiếp tục với</span></div>
-           </div>
-
-           <div class="grid grid-cols-2 gap-4">
-              <button class="flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-bold text-gray-700">
-                <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="Google">
-                Google
-              </button>
-              <button class="flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-bold text-gray-700">
-                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                Facebook
+              <!-- Facebook Login Button -->
+              <button type="button" class="group relative w-full flex items-center justify-center gap-3 py-4 bg-[#1877F2] text-white rounded-2xl hover:bg-[#166fe5] transition-all duration-300 transform active:scale-[0.98] shadow-lg shadow-blue-500/20">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                <span class="font-bold text-lg">Tiếp tục với Facebook</span>
               </button>
            </div>
 
-           <p class="text-center text-gray-500 text-sm">
-              Bạn đã có tài khoản? <a href="#" class="text-primary font-bold hover:underline">Đăng nhập</a>
+           <div class="pt-8 border-t border-gray-50">
+             <p class="text-center text-gray-400 text-sm leading-relaxed">
+                Bằng cách tiếp tục, bạn đồng ý với <a href="#" class="text-gray-600 font-semibold hover:underline">Điều khoản dịch vụ</a> và <a href="#" class="text-gray-600 font-semibold hover:underline">Chính sách bảo mật</a> của SpeakUp.
+             </p>
+           </div>
+
+           <p class="text-center text-gray-500">
+              Bạn gặp khó khăn? <a href="#" class="text-primary font-bold hover:underline">Hỗ trợ ngay</a>
            </p>
+        </div>
+
+        <!-- Background Decorative Elements -->
+        <div class="absolute top-0 right-0 p-8 opacity-20 hidden md:block">
+           <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="60" cy="60" r="50" stroke="currentColor" stroke-width="2" stroke-dasharray="8 8" class="text-gray-200" />
+           </svg>
         </div>
       </div>
     </div>
   `
 })
-export class RegisterComponent {}
+export class RegisterComponent { }
