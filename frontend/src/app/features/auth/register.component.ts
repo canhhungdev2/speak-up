@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { SupabaseService } from '../../core/services/supabase.service';
 
 @Component({
@@ -15,7 +15,7 @@ import { SupabaseService } from '../../core/services/supabase.service';
         <div class="relative z-10 space-y-8">
            <div class="flex items-center gap-2 mb-8">
             <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-              <span class="text-primary font-bold text-xl">S</span>
+               <span class="text-primary font-bold text-xl">S</span>
             </div>
             <span class="text-2xl font-black tracking-tight">SpeakUp</span>
           </div>
@@ -119,10 +119,18 @@ import { SupabaseService } from '../../core/services/supabase.service';
 })
 export class RegisterComponent {
   private supabaseService = inject(SupabaseService);
+  private router = inject(Router);
+
+  constructor() {
+    effect(() => {
+      if (this.supabaseService.isLoggedIn()) {
+        this.router.navigate(['/learner/courses']);
+      }
+    });
+  }
 
   onGoogleLogin() {
     this.supabaseService.signInWithGoogle().catch(err => {
-      // Xử lý lỗi nếu cần
       alert('Đã có lỗi xảy ra khi đăng nhập bằng Google.');
     });
   }

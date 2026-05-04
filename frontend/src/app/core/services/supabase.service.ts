@@ -49,17 +49,28 @@ export class SupabaseService {
   }
 
   private async fetchProfile(userId: string) {
-    const { data, error } = await this.supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const fetchPromise = this.supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .limit(1);
 
-    if (error) {
-      console.error('Lỗi khi lấy profile:', error.message);
-      return;
+      const { data, error } = await Promise.race([
+        fetchPromise,
+        new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+      ]);
+
+      if (error) {
+        this._profile.set(null);
+        return;
+      }
+
+      const profileData = data && data.length > 0 ? data[0] : null;
+      this._profile.set(profileData);
+    } catch (err) {
+      this._profile.set(null);
     }
-    this._profile.set(data);
   }
 
   /**
