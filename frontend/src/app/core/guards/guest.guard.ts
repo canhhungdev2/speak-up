@@ -10,8 +10,11 @@ export const guestGuard: CanActivateFn = async (route, state) => {
   const supabaseService = inject(SupabaseService);
   const router = inject(Router);
 
-  // Lấy session hiện tại
-  const { data: { session } } = await supabaseService.getSession();
+  // Đợi quá trình khởi tạo hoàn tất để có kết quả chính xác nhất
+  await supabaseService.initialized;
+
+  // Lấy session hiện tại (lúc này chắc chắn đã có kết quả từ initialize)
+  const session = supabaseService.currentUser();
 
   if (session) {
     // Nếu đã đăng nhập, đẩy vào dashboard ngay

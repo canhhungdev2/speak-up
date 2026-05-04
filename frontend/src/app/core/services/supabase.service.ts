@@ -8,14 +8,22 @@ import { environment } from '../../../environments/environment';
 export class SupabaseService {
   private supabase: SupabaseClient;
   
-  // Signal lưu trữ thông tin user hiện tại
   private _currentUser = signal<User | null>(null);
-  private _profile = signal<any | null>(null); // Lưu thông tin từ bảng public.profiles
+  private _profile = signal<any | null>(null);
+  private _isInitializing = signal<boolean>(true);
+  private _isFetchingProfile = false;
+
+  // Lời hứa (Promise) để các Guard có thể đợi quá trình khởi tạo hoàn tất
+  private resolveInitialized!: (value: void | PromiseLike<void>) => void;
+  initialized = new Promise<void>((resolve) => {
+    this.resolveInitialized = resolve;
+  });
 
   currentUser = computed(() => this._currentUser());
   profile = computed(() => this._profile());
   isLoggedIn = computed(() => !!this._currentUser());
   isAdmin = computed(() => this._profile()?.role === 'admin');
+  isInitializing = computed(() => this._isInitializing());
 
   constructor() {
     this.supabase = createClient(
@@ -25,19 +33,23 @@ export class SupabaseService {
 
     // Lắng nghe sự thay đổi trạng thái đăng nhập
     this.supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Sự kiện Auth:', event);
       const user = session?.user ?? null;
       this._currentUser.set(user);
       
-      if (user) {
+      // Chỉ fetch profile nếu chưa có hoặc khi đăng nhập mới, 
+      // tránh gọi trùng với initialize()
+      if (user && !this._profile()) {
         await this.fetchProfile(user.id);
-      } else {
+      } else if (!user) {
         this._profile.set(null);
       }
     });
 
     // Khởi tạo user ngay khi load app
-    this.initialize();
+    this.initialize().finally(() => {
+      this._isInitializing.set(false);
+      this.resolveInitialized();
+    });
   }
 
   private async initialize() {
@@ -49,6 +61,9 @@ export class SupabaseService {
   }
 
   private async fetchProfile(userId: string) {
+    if (this._isFetchingProfile) return;
+    this._isFetchingProfile = true;
+
     try {
       const fetchPromise = this.supabase
         .from('profiles')
@@ -56,20 +71,19 @@ export class SupabaseService {
         .eq('id', userId)
         .limit(1);
 
+      // Giảm timeout xuống 2s để app phản hồi nhanh hơn
       const { data, error } = await Promise.race([
         fetchPromise,
-        new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+        new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
       ]);
 
-      if (error) {
-        this._profile.set(null);
-        return;
+      if (!error && data && data.length > 0) {
+        this._profile.set(data[0]);
       }
-
-      const profileData = data && data.length > 0 ? data[0] : null;
-      this._profile.set(profileData);
     } catch (err) {
-      this._profile.set(null);
+      // Bỏ qua lỗi để app vẫn có thể vào được (AuthGuard sẽ xử lý tiếp)
+    } finally {
+      this._isFetchingProfile = false;
     }
   }
 

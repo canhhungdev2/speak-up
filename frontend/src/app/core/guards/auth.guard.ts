@@ -17,12 +17,8 @@ export const authGuard: CanActivateFn = async (route, state) => {
   // 2. Kiểm tra phân quyền (nếu route có yêu cầu role cụ thể)
   const requiredRole = route.data['requiredRole'];
   if (requiredRole) {
-    // Đợi tối đa 3 giây để profile được load
-    let attempts = 0;
-    while (!supabaseService.profile() && attempts < 15) {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      attempts++;
-    }
+    // Đợi quá trình khởi tạo (lấy profile) hoàn tất
+    await supabaseService.initialized;
 
     const profile = supabaseService.profile();
     const currentRole = profile?.role;

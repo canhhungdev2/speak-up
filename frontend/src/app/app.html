@@ -1,1 +1,24 @@
-<router-outlet></router-outlet>
+<!-- Màn hình Loading toàn trang khi đang khởi tạo -->
+<div *ngIf="supabaseService.isInitializing()" 
+     class="fixed inset-0 z-[9999] bg-white dark:bg-[#0f172a] flex flex-col items-center justify-center transition-opacity duration-500">
+  <div class="relative w-24 h-24">
+    <!-- Vòng quay bên ngoài -->
+    <div class="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+    <div class="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    
+    <!-- Logo chữ S ở giữa -->
+    <div class="absolute inset-0 flex items-center justify-center">
+      <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
+        <span class="text-white font-bold text-2xl">S</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mt-8 text-center animate-pulse">
+    <h2 class="text-xl font-black text-gray-900 dark:text-white tracking-tighter">SpeakUp</h2>
+    <p class="text-sm text-gray-500 font-bold mt-2">Đang chuẩn bị bài học...</p>
+  </div>
+</div>
+
+<!-- Nội dung chính của App -->
+<router-outlet *ngIf="!supabaseService.isInitializing()"></router-outlet>
