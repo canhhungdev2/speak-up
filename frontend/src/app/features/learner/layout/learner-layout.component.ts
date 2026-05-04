@@ -1,8 +1,9 @@
 import { Component, ChangeDetectionStrategy, signal, inject, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
 import { SidebarService } from '../../../core/services/sidebar.service';
+import { SupabaseService } from '../../../core/services/supabase.service';
 
 @Component({
   selector: 'app-learner-layout',
@@ -97,21 +98,45 @@ import { SidebarService } from '../../../core/services/sidebar.service';
                    [class.justify-center]="sidebarService.isSlim()">
              <span *ngIf="!sidebarService.isSlim()" class="text-sm font-bold text-gray-600 dark:text-slate-300 flex-grow text-left animate-in fade-in duration-500">Chế độ tối</span>
              <div class="w-12 h-6 bg-gray-200 dark:bg-primary/20 rounded-full relative transition-colors shrink-0">
-                <div [class.translate-x-6]="themeService.isDarkMode()" 
-                     class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white dark:bg-primary shadow-sm transition-transform"></div>
+                 <div [class.translate-x-6]="themeService.isDarkMode()" 
+                      class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white dark:bg-primary shadow-sm transition-transform"></div>
              </div>
            </button>
            
-           <div class="flex items-center gap-4 p-2 transition-all duration-300" [class.justify-center]="sidebarService.isSlim()">
-              <div class="w-12 h-12 bg-gradient-to-tr from-primary to-secondary rounded-2xl p-[2px] shrink-0">
-                 <div class="w-full h-full bg-white dark:bg-[#1e293b] rounded-[14px] flex items-center justify-center">
-                    <span class="text-sm font-black text-primary">CH</span>
-                 </div>
-              </div>
-              <div *ngIf="!sidebarService.isSlim()" class="animate-in fade-in duration-500">
-                 <p class="text-sm font-black text-gray-900 dark:text-white whitespace-nowrap">Cảnh Hưng</p>
-                 <p class="text-[10px] font-bold text-primary uppercase">Cấp độ 5</p>
-              </div>
+           <!-- User Profile Section -->
+           <div class="group relative">
+             <div (click)="onLogout()" 
+                  [title]="sidebarService.isSlim() ? 'Đăng xuất' : 'Nhấn để đăng xuất'"
+                  class="flex items-center gap-4 p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer transition-all duration-300" 
+                  [class.justify-center]="sidebarService.isSlim()">
+                <div class="w-12 h-12 bg-gradient-to-tr from-primary to-secondary rounded-2xl p-[2px] shrink-0 overflow-hidden shadow-lg shadow-primary/20">
+                   <div class="w-full h-full bg-white dark:bg-[#1e293b] rounded-[14px] flex items-center justify-center overflow-hidden">
+                      <img *ngIf="supabaseService.currentUser()?.user_metadata?.['avatar_url']" 
+                           [src]="supabaseService.currentUser()?.user_metadata?.['avatar_url']" 
+                           class="w-full h-full object-cover">
+                      <span *ngIf="!supabaseService.currentUser()?.user_metadata?.['avatar_url']" 
+                            class="text-sm font-black text-primary">
+                        {{ getUserInitials() }}
+                      </span>
+                   </div>
+                </div>
+                <div *ngIf="!sidebarService.isSlim()" class="animate-in fade-in duration-500 overflow-hidden">
+                   <p class="text-sm font-black text-gray-900 dark:text-white whitespace-nowrap truncate">
+                     {{ supabaseService.currentUser()?.user_metadata?.['full_name'] || 'Học viên' }}
+                   </p>
+                   <p class="text-[10px] font-bold text-primary uppercase flex items-center gap-1">
+                     <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                     Đang hoạt động
+                   </p>
+                </div>
+             </div>
+             
+             <!-- Tooltip Đăng xuất -->
+             <div *ngIf="!sidebarService.isSlim()" 
+                  class="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-2 bg-gray-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[110]">
+               Nhấn để đăng xuất
+               <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+             </div>
            </div>
         </div>
       </aside>
@@ -187,6 +212,9 @@ export class LearnerLayoutComponent implements OnInit {
 
   themeService = inject(ThemeService);
   sidebarService = inject(SidebarService);
+  supabaseService = inject(SupabaseService);
+  router = inject(Router);
+  
   isMobileMenuOpen = signal(false);
 
   ngOnInit() {
@@ -195,5 +223,17 @@ export class LearnerLayoutComponent implements OnInit {
 
   toggleMobileMenu() {
     this.isMobileMenuOpen.update(v => !v);
+  }
+
+  getUserInitials(): string {
+    const name = this.supabaseService.currentUser()?.user_metadata?.['full_name'] || 'User';
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2);
+  }
+
+  async onLogout() {
+    if (confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
+      await this.supabaseService.signOut();
+      this.router.navigate(['/register']);
+    }
   }
 }

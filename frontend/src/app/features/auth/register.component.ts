@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { SupabaseService } from '../../core/services/supabase.service';
 
 @Component({
   selector: 'app-register',
@@ -80,7 +81,9 @@ import { RouterModule } from '@angular/router';
 
            <div class="space-y-4">
               <!-- Google Login Button (Primary) -->
-              <button type="button" class="group relative w-full flex items-center justify-center gap-3 py-4 bg-white border-2 border-gray-100 rounded-2xl hover:border-primary/30 hover:bg-gray-50 transition-all duration-300 transform active:scale-[0.98] shadow-sm">
+              <button type="button" 
+                      (click)="onGoogleLogin()"
+                      class="group relative w-full flex items-center justify-center gap-3 py-4 bg-white border-2 border-gray-100 rounded-2xl hover:border-primary/30 hover:bg-gray-50 transition-all duration-300 transform active:scale-[0.98] shadow-sm">
                 <img src="https://www.google.com/favicon.ico" class="w-5 h-5" alt="Google">
                 <span class="text-gray-700 font-bold text-lg">Tiếp tục với Google</span>
                 <div class="absolute inset-0 rounded-2xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -114,4 +117,13 @@ import { RouterModule } from '@angular/router';
     </div>
   `
 })
-export class RegisterComponent { }
+export class RegisterComponent {
+  private supabaseService = inject(SupabaseService);
+
+  onGoogleLogin() {
+    this.supabaseService.signInWithGoogle().catch(err => {
+      // Xử lý lỗi nếu cần
+      alert('Đã có lỗi xảy ra khi đăng nhập bằng Google.');
+    });
+  }
+}
