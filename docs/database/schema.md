@@ -7,6 +7,7 @@
 ### `User` (Bảng `profiles`)
 Lưu trữ thông tin chi tiết của người học, mở rộng từ bảng `auth.users` của Supabase.
 - `id`: Định danh duy nhất (UUID), khớp với ID từ Supabase Auth.
+- `email`: Địa chỉ email của người dùng (đồng bộ từ auth.users).
 - `username`: Tên người dùng hiển thị trên hệ thống.
 - `role`: Phân quyền (ví dụ: `learner` cho học viên, `admin` cho quản trị viên).
 - `created_at`: Thời điểm tạo tài khoản.
@@ -15,6 +16,7 @@ Lưu trữ thông tin chi tiết của người học, mở rộng từ bảng `
 @Entity('profiles')
 export class User {
   @PrimaryColumn('uuid') id: string; 
+  @Column({ nullable: true }) email: string;
   @Column() username: string;
   @Column() role: string;           
   @CreateDateColumn() created_at: Date;
