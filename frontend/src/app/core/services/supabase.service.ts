@@ -11,7 +11,9 @@ export class SupabaseService {
   private _currentUser = signal<User | null>(null);
   private _profile = signal<any | null>(null);
   private _isInitializing = signal<boolean>(true);
-  private _isFetchingProfile = false;
+  
+  // Dùng Promise chung để tránh trường hợp 2 nơi cùng gọi nhưng nơi thứ 2 lại không đợi
+  private _fetchProfilePromise: Promise<void> | null = null;
 
   // Lời hứa (Promise) để các Guard có thể đợi quá trình khởi tạo hoàn tất
   private resolveInitialized!: (value: void | PromiseLike<void>) => void;
@@ -36,8 +38,7 @@ export class SupabaseService {
       const user = session?.user ?? null;
       this._currentUser.set(user);
       
-      // Chỉ fetch profile nếu chưa có hoặc khi đăng nhập mới, 
-      // tránh gọi trùng với initialize()
+      // Chỉ fetch profile nếu chưa có hoặc khi đăng nhập mới
       if (user && !this._profile()) {
         await this.fetchProfile(user.id);
       } else if (!user) {
@@ -61,30 +62,40 @@ export class SupabaseService {
   }
 
   private async fetchProfile(userId: string) {
-    if (this._isFetchingProfile) return;
-    this._isFetchingProfile = true;
-
-    try {
-      const fetchPromise = this.supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .limit(1);
-
-      // Giảm timeout xuống 2s để app phản hồi nhanh hơn
-      const { data, error } = await Promise.race([
-        fetchPromise,
-        new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
-      ]);
-
-      if (!error && data && data.length > 0) {
-        this._profile.set(data[0]);
-      }
-    } catch (err) {
-      // Bỏ qua lỗi để app vẫn có thể vào được (AuthGuard sẽ xử lý tiếp)
-    } finally {
-      this._isFetchingProfile = false;
+    if (this._fetchProfilePromise) {
+      return this._fetchProfilePromise; // Chờ chung Promise nếu đang gọi rồi
     }
+
+    this._fetchProfilePromise = (async () => {
+      try {
+        const fetchPromise = this.supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .limit(1);
+
+        // Giới hạn 2.5s để tránh app chờ quá lâu nếu database bị khóa
+        const { data, error } = await Promise.race([
+          fetchPromise,
+          new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Timeout 2.5s')), 2500))
+        ]);
+
+        console.log("fetchProfile data:", data);
+        if (error) {
+          console.error("fetchProfile error:", error);
+        }
+
+        if (!error && data && data.length > 0) {
+          this._profile.set(data[0]);
+        }
+      } catch (err) {
+        console.error("fetchProfile exception:", err);
+      } finally {
+        this._fetchProfilePromise = null;
+      }
+    })();
+
+    return this._fetchProfilePromise;
   }
 
   /**
