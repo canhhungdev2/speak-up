@@ -12,18 +12,18 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
   template: `
     <div class="p-4 md:p-10 max-w-5xl mx-auto">
       <!-- Course Header -->
-      <div class="relative rounded-[3rem] overflow-hidden mb-12 shadow-2xl">
-          <img [src]="course().thumbnail | mediaUrl" class="w-full h-80 object-cover opacity-80" [alt]="course().title">
+      <div class="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden mb-8 md:mb-12 shadow-2xl">
+          <img [src]="course().thumbnail | mediaUrl" class="w-full h-64 md:h-80 object-cover opacity-80" [alt]="course().title">
           <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
-          <div class="absolute bottom-10 left-10 right-10">
+          <div class="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-10">
             <div class="flex items-center gap-3 mb-4">
                 <span class="px-4 py-1 bg-primary text-white text-xs font-black rounded-full uppercase tracking-widest">
                   {{ course().level }}
                 </span>
                 <span class="text-white/60 text-sm font-bold">{{ course().lessons.length }} Bài học</span>
             </div>
-            <h1 class="text-4xl md:text-5xl font-black text-white font-outfit mb-4">{{ course().title }}</h1>
-            <div class="flex items-center gap-6">
+            <h1 class="text-3xl md:text-5xl font-black text-white font-outfit mb-4">{{ course().title }}</h1>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
                 <div class="flex-grow max-w-xs h-2 bg-white/20 rounded-full overflow-hidden">
                   <div class="bg-primary h-full rounded-full" [style.width.%]="40"></div>
                 </div>
@@ -38,8 +38,8 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
           
           @for (lesson of course().lessons; track lesson.id) {
             <div class="group relative">
-              <div class="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-transparent rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-              <div class="relative bg-white dark:bg-[#1e293b] p-6 rounded-3xl border border-gray-100 dark:border-white/5 flex items-center gap-6 hover:shadow-xl transition-all cursor-pointer">
+              <div class="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-transparent rounded-2xl md:rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+              <div class="relative bg-white dark:bg-[#1e293b] p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 dark:border-white/5 flex items-center gap-4 md:gap-6 hover:shadow-xl transition-all cursor-pointer">
                   <!-- Lesson Number -->
                   <div class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-xl font-black text-gray-400 group-hover:text-primary transition-colors">
                     {{ lesson.order_index }}
@@ -47,7 +47,7 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
 
                   <!-- Lesson Info -->
                   <div class="flex-grow">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">{{ lesson.title }}</h3>
+                    <h3 class="text-base md:text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">{{ lesson.title }}</h3>
                     <div class="flex items-center gap-4 mt-1">
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Bắt đầu học</span>
                     </div>
@@ -63,7 +63,7 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                       </div>
                     } @else {
                       <button [routerLink]="['/learner/courses', course().slug, 'lessons', lesson.slug]" 
-                              class="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                              class="px-4 md:px-6 py-2 md:py-2.5 text-sm md:text-base bg-primary text-white font-bold rounded-xl hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
                         Học ngay
                       </button>
                     }

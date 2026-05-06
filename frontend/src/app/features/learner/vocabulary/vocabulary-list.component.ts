@@ -12,8 +12,8 @@ import { RouterModule } from '@angular/router';
       <!-- Header -->
       <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 class="text-3xl font-black text-gray-900 dark:text-white font-outfit mb-2">Từ vựng của tôi 📖</h1>
-          <p class="text-gray-500 dark:text-slate-400">Quản lý và theo dõi quá trình ghi nhớ từ vựng.</p>
+          <h1 class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white font-outfit mb-2">Từ vựng của tôi 📖</h1>
+          <p class="text-sm md:text-base text-gray-500 dark:text-slate-400">Quản lý và theo dõi quá trình ghi nhớ từ vựng.</p>
         </div>
         <div class="flex gap-3 w-full md:w-auto">
             <div class="relative flex-grow md:w-64">
@@ -40,25 +40,25 @@ import { RouterModule } from '@angular/router';
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           <div class="bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-500/20">
             <p class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Đã thuộc</p>
-            <p class="text-2xl font-black text-emerald-700 dark:text-emerald-300">{{ masteredCount() }}</p>
+            <p class="text-xl md:text-2xl font-black text-emerald-700 dark:text-emerald-300">{{ masteredCount() }}</p>
           </div>
           <div class="bg-amber-50 dark:bg-amber-500/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-500/20">
             <p class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Đang học</p>
-            <p class="text-2xl font-black text-amber-700 dark:text-amber-300">{{ learningCount() }}</p>
+            <p class="text-xl md:text-2xl font-black text-amber-700 dark:text-amber-300">{{ learningCount() }}</p>
           </div>
           <div class="bg-rose-50 dark:bg-rose-500/10 p-4 rounded-2xl border border-rose-100 dark:border-rose-500/20">
             <p class="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">Đến hạn ôn</p>
-            <p class="text-2xl font-black text-rose-700 dark:text-rose-300">{{ dueCount() }}</p>
+            <p class="text-xl md:text-2xl font-black text-rose-700 dark:text-rose-300">{{ dueCount() }}</p>
           </div>
           <div class="bg-indigo-50 dark:bg-indigo-500/10 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
             <p class="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Mới nạp</p>
-            <p class="text-2xl font-black text-indigo-700 dark:text-indigo-300">{{ newCount() }}</p>
+            <p class="text-xl md:text-2xl font-black text-indigo-700 dark:text-indigo-300">{{ newCount() }}</p>
           </div>
       </div>
 
       <!-- Vocabulary Table -->
-      <div class="bg-white dark:bg-[#1e293b] rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden">
-          <table class="w-full text-left border-collapse">
+      <div class="bg-white dark:bg-[#1e293b] rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden overflow-x-auto">
+          <table class="w-full min-w-[600px] text-left border-collapse">
             <thead>
                 <tr class="bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-white/10">
                   <th class="px-8 py-5 text-xs font-black text-gray-400 uppercase tracking-wider">Từ vựng</th>
@@ -71,7 +71,7 @@ import { RouterModule } from '@angular/router';
                 @for (word of words(); track word.term) {
                   <tr class="group hover:bg-gray-50 dark:hover:bg-white/10 transition-colors">
                       <td class="px-8 py-6">
-                        <span class="text-lg font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors">{{ word.term }}</span>
+                        <span class="text-base md:text-lg font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors">{{ word.term }}</span>
                       </td>
                       <td class="px-8 py-6">
                         <p class="text-sm text-gray-500 dark:text-slate-400 line-clamp-1">{{ word.definition }}</p>

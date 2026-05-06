@@ -75,9 +75,9 @@ interface LessonSection {
           <div class="max-w-6xl mx-auto pb-40 md:pb-32">
             
             <!-- Mobile Section Selector Toggle -->
-            <div class="lg:hidden mb-8 flex items-center justify-between">
+            <div class="lg:hidden sticky top-0 z-[45] pt-4 -mt-4 mb-4 pb-2 pointer-events-none">
                 <button (click)="isMobileSidebarOpen.set(true)" 
-                        class="flex items-center gap-3 px-5 py-3 bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:border-primary/30 transition-all">
+                        class="flex items-center gap-3 px-5 py-3 bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-white/10 shadow-lg hover:border-primary/30 transition-all w-fit pointer-events-auto">
                     <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />

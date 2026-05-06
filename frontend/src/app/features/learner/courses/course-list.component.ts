@@ -15,8 +15,8 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
       <div class="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
 
       <header class="mb-12">
-        <h1 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight font-outfit mb-2">Khám phá Khóa học 📚</h1>
-        <p class="text-gray-500 dark:text-slate-400 text-lg">Tìm kiếm lộ trình học tập phù hợp nhất với bạn.</p>
+        <h1 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight font-outfit mb-2">Khám phá Khóa học 📚</h1>
+        <p class="text-base md:text-lg text-gray-500 dark:text-slate-400">Tìm kiếm lộ trình học tập phù hợp nhất với bạn.</p>
       </header>
 
       <!-- Categories -->
@@ -44,8 +44,8 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
 
                 <!-- Content -->
                 <div class="p-8 space-y-4 flex-grow flex flex-col">
-                  <h3 class="text-2xl font-black text-gray-900 dark:text-white leading-tight group-hover:text-primary transition-colors font-outfit">{{ course.title }}</h3>
-                  <p class="text-gray-500 dark:text-slate-400 text-sm leading-relaxed flex-grow">
+                  <h3 class="text-xl md:text-2xl font-black text-gray-900 dark:text-white leading-tight group-hover:text-primary transition-colors font-outfit">{{ course.title }}</h3>
+                  <p class="text-sm md:text-base text-gray-500 dark:text-slate-400 leading-relaxed flex-grow">
                       {{ course.description }}
                   </p>
 

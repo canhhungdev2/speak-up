@@ -27,7 +27,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
             <span class="text-white font-bold text-xl">S</span>
           </div>
           <span *ngIf="!sidebarService.isSlim()" 
-                class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter font-outfit whitespace-nowrap animate-in fade-in duration-500">
+                class="text-xl md:text-2xl font-black text-gray-900 dark:text-white tracking-tighter font-outfit whitespace-nowrap animate-in fade-in duration-500">
             SpeakUp
           </span>
         </div>
@@ -88,6 +88,22 @@ import { SupabaseService } from '../../../core/services/supabase.service';
               </a>
             </nav>
           </div>
+
+          <div *ngIf="supabaseService.isAdmin()">
+            <p *ngIf="!sidebarService.isSlim()" class="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] mt-8 mb-6 px-4 animate-in fade-in duration-500">Hệ thống</p>
+            <nav class="space-y-2">
+              <a routerLink="/admin" routerLinkActive="bg-primary/10 text-primary dark:bg-primary/20"
+                 [title]="sidebarService.isSlim() ? 'Quản trị' : ''"
+                 class="flex items-center gap-4 px-4 py-3.5 text-gray-500 dark:text-slate-400 font-bold rounded-2xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
+                 [class.justify-center]="sidebarService.isSlim()">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                 </svg>
+                 <span *ngIf="!sidebarService.isSlim()" class="whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-500">Quản trị</span>
+              </a>
+            </nav>
+          </div>
         </div>
 
         <!-- Theme Toggle & Profile Footer -->
@@ -121,7 +137,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
                    </div>
                 </div>
                 <div *ngIf="!sidebarService.isSlim()" class="animate-in fade-in duration-500 overflow-hidden">
-                   <p class="text-sm font-black text-gray-900 dark:text-white whitespace-nowrap truncate">
+                   <p class="text-xs md:text-sm font-black text-gray-900 dark:text-white whitespace-nowrap truncate">
                      {{ supabaseService.currentUser()?.user_metadata?.['full_name'] || 'Học viên' }}
                    </p>
                    <p class="text-[10px] font-bold text-primary uppercase flex items-center gap-1">
@@ -144,7 +160,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
       <!-- Main Layout -->
       <div class="flex-grow flex flex-col min-w-0">
         <!-- Header -->
-        <header class="h-24 px-8 flex justify-between items-center bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-md sticky top-0 z-[50] border-b border-gray-100 dark:border-white/5">
+        <header class="h-16 md:h-24 px-4 md:px-8 flex justify-between items-center bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-md sticky top-0 z-[50] border-b border-gray-100 dark:border-white/5">
            <!-- Search Bar -->
            <div *ngIf="!sidebarService.isSlim()" class="relative w-full max-w-md hidden md:block animate-in fade-in duration-500">
               <input type="text" placeholder="Tìm kiếm bài học..." 
@@ -159,7 +175,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </button>
-              <h2 *ngIf="title" class="text-xl font-black text-gray-900 dark:text-white font-outfit truncate max-w-[200px] md:max-w-md">{{ title }}</h2>
+              <h2 *ngIf="title" class="text-lg md:text-xl font-black text-gray-900 dark:text-white font-outfit truncate max-w-[200px] md:max-w-md">{{ title }}</h2>
            </div>
 
            <!-- Mobile Menu Toggle -->
@@ -195,6 +211,38 @@ import { SupabaseService } from '../../../core/services/supabase.service';
       <div *ngIf="isMobileMenuOpen()" 
            (click)="toggleMobileMenu()"
            class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[90] md:hidden"></div>
+
+      <!-- Logout Confirmation Modal -->
+      <div *ngIf="showLogoutModal()" 
+           class="fixed inset-0 z-[120] flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-gray-900/60 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+             (click)="showLogoutModal.set(false)"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white dark:bg-[#1e293b] rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300">
+          <div class="p-6">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </div>
+            <h3 class="text-lg md:text-xl font-black text-center text-gray-900 dark:text-white mb-2">Đăng xuất?</h3>
+            <p class="text-center text-gray-500 dark:text-slate-400 font-medium mb-6">Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?</p>
+            
+            <div class="flex gap-3">
+              <button (click)="showLogoutModal.set(false)" 
+                      class="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-slate-300 font-bold rounded-xl transition-colors">
+                Hủy
+              </button>
+              <button (click)="confirmLogout()" 
+                      class="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 transition-all active:scale-95">
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -216,6 +264,7 @@ export class LearnerLayoutComponent implements OnInit {
   router = inject(Router);
   
   isMobileMenuOpen = signal(false);
+  showLogoutModal = signal(false);
 
   ngOnInit() {
     // Initial setup if needed
@@ -230,10 +279,13 @@ export class LearnerLayoutComponent implements OnInit {
     return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2);
   }
 
-  async onLogout() {
-    if (confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
-      await this.supabaseService.signOut();
-      this.router.navigate(['/register']);
-    }
+  onLogout() {
+    this.showLogoutModal.set(true);
+  }
+
+  async confirmLogout() {
+    this.showLogoutModal.set(false);
+    await this.supabaseService.signOut();
+    this.router.navigate(['/register']);
   }
 }
