@@ -12,20 +12,45 @@ Màn hình ôn tập từ vựng theo hệ thống lặp lại ngắt quãng (**
 1. Dashboard → Nút **"Ôn tập (N từ)"** trong Streak Banner
 2. My Vocabulary → Nút **"Ôn tập"** màu đỏ góc header
 
+## Kết nối Backend (Đã triển khai ✅)
+Dữ liệu được lấy từ API thật:
+
+```typescript
+// Tải danh sách từ đến hạn ôn tập
+GET /vocabulary/due
+// → Trả về UserVocabularyProgress[] kèm relation vocabulary
+
+// Cập nhật tiến độ sau khi đánh giá
+POST /vocabulary/review
+Body: { vocabId: string, rating: 'again' | 'hard' | 'good' | 'easy' }
+// → Backend tính toán nextReviewDate theo thuật toán SM-2
+```
+
+## Thuật toán SM-2
+
+Sau mỗi lần đánh giá, hệ thống tính `interval` (số ngày chờ) và `ease_factor` (hệ số nhân):
+
+| Rating | Lần đầu | Lần kế tiếp | Ease Factor |
+|---|---|---|---|
+| 😵 Quên (Again) | 0 ngày (xem lại ngay) | Reset interval = 0 | Giảm 0.2 (min 1.3) |
+| 😓 Khó (Hard) | 1 ngày | interval × 1.2 | Giảm 0.15 (min 1.3) |
+| 😊 Tốt (Good) | 1 → 3 ngày | interval × ease_factor | Không đổi |
+| 😎 Dễ (Easy) | 4 ngày | interval × ease_factor × 1.3 | Tăng 0.15 (max 5.0) |
+
+Khi `interval > 30 ngày`, từ được đánh dấu status `mastered`.
+
 ## Luồng học (Study Loop)
 
 ```
-[Vào trang] → Tải danh sách từ đến hạn
+[Vào trang] → Loading spinner
      ↓
-[Mặt trước] → Hiển thị TỪ + IPA + nút 🔊
-     ↓ (Space / Click "Hiện đáp án")
-[Mặt sau]  → Hiển thị NGHĨA + Câu ví dụ
+[Tải từ API] → GET /vocabulary/due
+     ↓ (Có từ)          ↓ (Không có từ)
+[Mặt trước]        [Màn hình "Hoàn thành hết 🎯"]
+     ↓ (Space)
+[Mặt sau]
      ↓
-[Tự đánh giá] → Chọn 1 trong 4 mức:
-  😵 Quên   → Thêm lại vào cuối queue (ôn lại ngay)
-  😓 Khó    → Lên lịch ôn sau 10 phút
-  😊 Tốt    → Lên lịch ôn sau 1 ngày
-  😎 Dễ    → Lên lịch ôn sau 4 ngày
+[Tự đánh giá] → POST /vocabulary/review → Lưu DB
      ↓ (Còn từ)
 [Từ tiếp theo] ...
      ↓ (Hết từ)
@@ -50,30 +75,14 @@ Màn hình ôn tập từ vựng theo hệ thống lặp lại ngắt quãng (**
 | `4` | Đánh giá: Dễ |
 | `Esc` (nút ✕) | Thoát về Dashboard |
 
-## Tính năng Âm thanh
-- Nút 🔊 dùng **Web Speech API** (`SpeechSynthesisUtterance`, ngôn ngữ `en-US`)
-- Không phát âm tự động khi lật thẻ (theo yêu cầu)
-
-## Dữ liệu & SRS Logic
-Hiện tại dùng **Mock Data** (5 từ hardcode). Sau khi kết nối backend:
-
-```typescript
-// Dữ liệu thật sẽ đến từ:
-GET /api/vocabulary/due   // Lấy danh sách từ đến hạn ôn của user
-
-// Sau khi đánh giá:
-POST /api/vocabulary/:id/review
-Body: { rating: 'good' | 'hard' | 'easy' | 'again' }
-// Backend tính toán nextReviewDate theo thuật toán SM-2
-```
-
-## Animation & Cảm giác (Feel)
-- [x] **Card Flip**: Hiệu ứng lật thẻ 3D mượt mà bằng CSS `transform` và `backface-visibility`.
-- [x] **Transitions**: Animation chuyển thẻ (slide + fade) cực kỳ cao cấp, mang lại cảm giác mượt mà như app mobile.
-- [x] **Confetti**: Hiệu ứng pháo giấy khi hoàn thành session.
+## Xử lý lỗi & Loading
+- Khi đang gọi API đánh giá, nút bấm bị khóa (`isLoading` signal)
+- Nếu API lỗi, hiệu ứng rung (shake) thông báo cho người dùng
+- Nếu không có từ nào đến hạn, hiển thị giao diện trống thân thiện
 
 ## TODO / Còn thiếu
-- [ ] Kết nối API thực tế để lấy từ đến hạn
-- [ ] Implement thuật toán SM-2 đầy đủ ở Backend (đã có Entity)
-- [ ] Thêm chế độ học Trắc nghiệm (Multiple Choice) cho từ level 2+
+- [x] Kết nối API thực tế để lấy từ đến hạn
+- [x] Implement thuật toán SM-2 đầy đủ ở Backend
+- [x] Xử lý trạng thái loading, empty, error
 - [ ] Lưu trạng thái session nếu người dùng thoát giữa chừng
+- [ ] Phát âm tự động bằng file audio thay vì Web Speech API

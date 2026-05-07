@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { VocabularyService } from './vocabulary.service';
 import { Vocabulary } from '../../entities/vocabulary.entity';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
@@ -9,6 +9,31 @@ import { Roles } from '../../common/decorators/roles.decorator';
 @UseGuards(SupabaseAuthGuard, RolesGuard)
 export class VocabularyController {
   constructor(private readonly vocabularyService: VocabularyService) {}
+
+  @Get('due')
+  findDue(@Req() req: any) {
+    return this.vocabularyService.findDueByUserId(req.user.sub);
+  }
+
+  @Get('stats')
+  getStats(@Req() req: any) {
+    return this.vocabularyService.getStats(req.user.sub);
+  }
+
+  @Post('review')
+  updateProgress(@Req() req: any, @Body() data: { vocabId: string, rating: 'again' | 'hard' | 'good' | 'easy' }) {
+    return this.vocabularyService.updateSRSProgress(req.user.sub, data.vocabId, data.rating);
+  }
+
+  @Post('learn')
+  learn(@Req() req: any, @Body() data: { vocabId: string }) {
+    return this.vocabularyService.learn(req.user.sub, data.vocabId);
+  }
+
+  @Post('learn-batch')
+  learnBatch(@Req() req: any, @Body() data: { items: { vocabId: string; rating: 'again' | 'hard' | 'good' | 'easy' }[] }) {
+    return this.vocabularyService.learnBatch(req.user.sub, data.items);
+  }
 
   @Post()
   @Roles('admin')

@@ -4,15 +4,17 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { VocabularyService, UserVocabularyProgress } from '../../../core/services/vocabulary.service';
+import { finalize } from 'rxjs';
 
 interface StudyCard {
-  id: number;
+  id: string;
   term: string;
   ipa: string;
   definition: string;
   example: string;
   wordType: string;
-  level: number;
+  vocabId: string;
 }
 
 type StudyPhase = 'front' | 'back' | 'done';
@@ -29,8 +31,21 @@ type StudyPhase = 'front' | 'back' | 'done';
       <div class="absolute top-[-200px] left-[-150px] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div class="absolute bottom-[-200px] right-[-150px] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <!-- PHASE: STUDYING -->
-      @if (phase() !== 'done') {
+      @if (phase() === 'loading') {
+        <div class="flex-grow flex flex-col items-center justify-center">
+          <div class="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+          <p class="mt-4 text-white/50 font-bold">Đang tải từ vựng...</p>
+        </div>
+      } @else if (phase() === 'empty') {
+        <div class="flex-grow flex flex-col items-center justify-center text-center px-6">
+          <div class="text-6xl mb-6">🎯</div>
+          <h2 class="text-3xl font-black text-white mb-2">Bạn đã hoàn thành hết!</h2>
+          <p class="text-white/40 mb-8 max-w-sm">Không còn từ vựng nào cần ôn tập hôm nay. Hãy quay lại sau hoặc học bài mới nhé.</p>
+          <button (click)="exitStudy()" class="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all">
+            Quay về trang chủ
+          </button>
+        </div>
+      } @else if (phase() !== 'done') {
         <!-- Top Bar -->
         <header class="relative z-10 flex items-center gap-4 px-6 py-4">
           <button (click)="exitStudy()" class="p-2 text-white/40 hover:text-white/80 transition-colors rounded-xl hover:bg-white/5">
@@ -253,23 +268,18 @@ type StudyPhase = 'front' | 'back' | 'done';
   `]
 })
 export class StudyComponent implements OnInit {
+  vocabService = inject(VocabularyService);
   router = inject(Router);
 
-  phase = signal<StudyPhase>('front');
+  phase = signal<StudyPhase | 'loading' | 'empty'>('loading');
   currentIndex = signal(0);
   shaking = signal(false);
+  isLoading = signal(false);
   results = signal({ total: 0, accuracy: 0, xp: 0, again: 0, hard: 0, good: 0, easy: 0 });
 
   private ratingCounts = { again: 0, hard: 0, good: 0, easy: 0 };
 
-  // Mock SRS queue - sẽ thay bằng dữ liệu thật từ backend
-  queue = signal<StudyCard[]>([
-    { id: 1, term: 'Persistent', ipa: '/pəˈsɪstənt/', definition: 'Kiên trì, bền bỉ, không bỏ cuộc', example: 'She was persistent in her efforts to learn English.', wordType: 'adj.', level: 2 },
-    { id: 2, term: 'Effortless', ipa: '/ˈefətləs/', definition: 'Không tốn sức, tự nhiên, dễ dàng', example: 'He made the difficult task look effortless.', wordType: 'adj.', level: 1 },
-    { id: 3, term: 'Vibrant', ipa: '/ˈvaɪbrənt/', definition: 'Sôi động, tràn đầy sức sống, rực rỡ', example: 'The city has a vibrant culture and nightlife.', wordType: 'adj.', level: 3 },
-    { id: 4, term: 'Resilient', ipa: '/rɪˈzɪliənt/', definition: 'Kiên cường, có khả năng phục hồi nhanh', example: 'Children are often more resilient than adults.', wordType: 'adj.', level: 1 },
-    { id: 5, term: 'Eloquent', ipa: '/ˈeləkwənt/', definition: 'Hùng hồn, lưu loát, có tài ăn nói', example: 'She gave an eloquent speech at the ceremony.', wordType: 'adj.', level: 2 },
-  ]);
+  queue = signal<StudyCard[]>([]);
 
   currentCard = computed(() => this.queue()[this.currentIndex()]);
   progressPercent = computed(() => (this.currentIndex() / this.queue().length) * 100);
@@ -282,7 +292,38 @@ export class StudyComponent implements OnInit {
     delay: Math.random() * 1000
   }));
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.loadDueWords();
+  }
+
+  loadDueWords() {
+    this.phase.set('loading');
+    this.vocabService.getDueWords().subscribe({
+      next: (data) => {
+        if (data.length === 0) {
+          this.phase.set('empty');
+          return;
+        }
+        
+        const mapped = data.map(item => ({
+          id: item.id,
+          vocabId: item.vocabulary_id,
+          term: item.vocabulary.term,
+          ipa: item.vocabulary.ipa || '',
+          definition: item.vocabulary.definition,
+          example: item.vocabulary.example || '',
+          wordType: item.vocabulary.word_type || ''
+        }));
+        
+        this.queue.set(mapped);
+        this.phase.set('front');
+      },
+      error: (err) => {
+        console.error('Lỗi tải từ vựng:', err);
+        this.phase.set('empty');
+      }
+    });
+  }
 
   @HostListener('window:keydown', ['$event'])
   handleKey(e: KeyboardEvent) {
@@ -303,21 +344,35 @@ export class StudyComponent implements OnInit {
   }
 
   rate(rating: 'again' | 'hard' | 'good' | 'easy') {
+    if (this.isLoading()) return;
+
     this.ratingCounts[rating]++;
+    const card = this.currentCard();
+    
+    this.isLoading.set(true);
+    this.vocabService.updateSRSProgress(card.vocabId, rating)
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: () => {
+          // "Again" = requeue card at end in the local view
+          if (rating === 'again') {
+            this.queue.update(q => [...q, card]);
+          }
 
-    // "Again" = requeue card at end
-    if (rating === 'again') {
-      const card = this.currentCard();
-      this.queue.update(q => [...q, card]);
-    }
-
-    const next = this.currentIndex() + 1;
-    if (next >= this.queue().length || (rating !== 'again' && next >= this.queue().length)) {
-      this.finishSession();
-    } else {
-      this.currentIndex.set(next);
-      this.phase.set('front');
-    }
+          const next = this.currentIndex() + 1;
+          if (next >= this.queue().length) {
+            this.finishSession();
+          } else {
+            this.currentIndex.set(next);
+            this.phase.set('front');
+          }
+        },
+        error: (err) => {
+          console.error('Lỗi cập nhật tiến độ:', err);
+          this.shaking.set(true);
+          setTimeout(() => this.shaking.set(false), 400);
+        }
+      });
   }
 
   private finishSession() {

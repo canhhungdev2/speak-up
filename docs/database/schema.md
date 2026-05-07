@@ -123,6 +123,7 @@ export class Vocabulary {
 erDiagram
     Course ||--o{ Lesson : "có nhiều"
     Lesson ||--o{ Vocabulary : "có nhiều"
+    Vocabulary ||--o{ UserVocabularyProgress : "theo dõi bởi"
     
     Course {
         uuid id PK
@@ -144,4 +145,58 @@ erDiagram
         string translation
         int order_index
     }
+    UserVocabularyProgress {
+        uuid id PK
+        uuid user_id FK
+        uuid vocabulary_id FK
+        string status
+        int interval
+        float ease_factor
+        timestamptz next_review_at
+    }
 ```
+
+### `UserVocabularyProgress` (Bảng `user_vocabulary_progress`)
+Lưu trữ tiến độ học từ vựng SRS (Spaced Repetition System) của từng người dùng.
+- `user_id`: Liên kết với user đang học (UUID từ Supabase Auth).
+- `vocabulary_id`: Liên kết với từ vựng (FK → `vocabulary.id`, ON DELETE CASCADE).
+- `status`: Trạng thái ghi nhớ (`learning` hoặc `mastered`).
+- `interval`: Số ngày chờ đến lần ôn tập tiếp theo.
+- `ease_factor`: Hệ số nhân độ dễ (mặc định 2.5, phạm vi 1.3 - 5.0).
+- `repetitions`: Số lần nhớ liên tiếp.
+- `next_review_at`: Thời điểm cần ôn tập lại (dùng cho query `WHERE next_review_at <= NOW()`).
+- `last_reviewed_at`: Lần cuối ôn tập.
+- **Ràng buộc**: `UNIQUE(user_id, vocabulary_id)` — mỗi user chỉ có 1 bản ghi cho 1 từ.
+- **Index**: `idx_user_vocab_next_review(user_id, next_review_at)` cho truy vấn nhanh.
+- **RLS**: Bật Row Level Security — người dùng chỉ truy cập dữ liệu của chính mình.
+- **Migration**: `backend/database/scripts/02-create-user-vocab-progress.sql`
+
+```typescript
+@Entity('user_vocabulary_progress')
+@Unique(['user_id', 'vocabulary_id'])
+export class UserVocabularyProgress {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column('uuid') user_id: string;
+  @Column('uuid') vocabulary_id: string;
+  @ManyToOne(() => Vocabulary) vocabulary: Vocabulary;
+  @Column({ default: 'learning' }) status: string;
+  @Column({ default: 0 }) interval: number;
+  @Column({ type: 'float', default: 2.5 }) ease_factor: number;
+  @Column({ default: 0 }) repetitions: number;
+  @Column({ type: 'timestamptz' }) next_review_at: Date;
+  @Column({ type: 'timestamptz', nullable: true }) last_reviewed_at: Date;
+  @CreateDateColumn() created_at: Date;
+  @UpdateDateColumn() updated_at: Date;
+}
+```
+
+## SRS API Endpoints
+
+| Method | Path | Auth | Mô tả |
+|---|---|---|---|
+| `GET` | `/vocabulary/due` | User | Lấy từ đến hạn ôn tập (`next_review_at <= NOW()`) |
+| `GET` | `/vocabulary/stats` | User | Thống kê: mastered, learning, due |
+| `POST` | `/vocabulary/review` | User | Cập nhật SRS sau đánh giá (SM-2) |
+| `POST` | `/vocabulary/learn` | User | Đưa 1 từ vào hệ thống SRS |
+| `POST` | `/vocabulary/learn-batch` | User | Đưa nhiều từ (sau Quiz) với rating |
+

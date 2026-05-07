@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MediaService } from '../../../core/services/media.service';
 import { LessonService } from '../../../core/services/lesson.service';
+import { VocabularyService } from '../../../core/services/vocabulary.service';
+import { VocabQuizComponent } from './vocab-quiz.component';
 import { environment } from '../../../../environments/environment';
 
 interface StorySentence {
@@ -39,7 +41,7 @@ interface LessonSection {
 @Component({
   selector: 'app-lesson-player',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, VocabQuizComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex h-[calc(100vh-6rem)] overflow-hidden relative" *ngIf="lessonData() as lesson">
@@ -111,6 +113,15 @@ interface LessonSection {
                 }
                 @case ('vocab') {
                   <div class="space-y-6">
+                      <!-- Quiz Button -->
+                      @if (lesson.vocabularies?.length >= 4) {
+                        <button (click)="isQuizOpen.set(true)"
+                                class="w-full py-4 px-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black text-base rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-indigo-500/20 flex items-center justify-center gap-3">
+                          <span class="text-xl">🧠</span>
+                          Kiểm tra từ vựng bài này
+                          <span class="bg-white/20 px-2.5 py-0.5 rounded-lg text-xs">{{ lesson.vocabularies.length }} từ</span>
+                        </button>
+                      }
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         @for (vocab of lesson.vocabularies; track vocab.id) {
                             <div class="p-5 md:p-6 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl md:rounded-[1.5rem] hover:border-primary/30 hover:shadow-sm transition-all group">
@@ -120,9 +131,9 @@ interface LessonSection {
                                         <span class="text-sm md:text-base text-gray-400 dark:text-slate-500 font-medium">{{ vocab.ipa }}</span>
                                     </div>
                                     <div class="flex items-center gap-3 shrink-0 text-gray-400 dark:text-slate-500">
-                                        <button class="hover:text-rose-500 transition-colors" title="Thêm vào yêu thích">
+                                        <button (click)="addToStudy(vocab.id)" class="hover:text-emerald-500 transition-colors" title="Thêm vào danh sách ôn tập">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                             </svg>
                                         </button>
                                         <button (click)="playVocabAudio(vocab)" class="hover:text-blue-500 transition-colors" title="Nghe phát âm">
@@ -143,6 +154,11 @@ interface LessonSection {
                         }
                       </div>
                   </div>
+
+                  <!-- Quiz Overlay -->
+                  @if (isQuizOpen()) {
+                    <app-vocab-quiz [vocabularies]="lesson.vocabularies" (closed)="isQuizOpen.set(false)" />
+                  }
                 }
                 @case ('story') {
                   <div class="space-y-8">
@@ -313,6 +329,7 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private mediaService = inject(MediaService);
   private lessonService = inject(LessonService);
+  private vocabService = inject(VocabularyService);
 
   lessonData = signal<any>(null);
   isMobileSidebarOpen = signal(false);
@@ -321,6 +338,7 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
   currentTime = signal(0);
   duration = signal(0);
   playbackSpeed = signal(1);
+  isQuizOpen = signal(false);
 
   sections = computed<LessonSection[]>(() => {
     const lesson = this.lessonData();
@@ -552,6 +570,17 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
     const url = this.getMediaUrl(vocab.audio_url);
     const audio = new Audio(url);
     audio.play().catch(err => console.error('Vocab audio play failed', err));
+  }
+
+  addToStudy(vocabId: string) {
+    this.vocabService.learn(vocabId).subscribe({
+      next: () => {
+        console.log('Đã thêm từ vựng vào danh sách học');
+      },
+      error: (err) => {
+        console.error('Lỗi khi thêm từ vựng:', err);
+      }
+    });
   }
 
   seekAudio(time: number) {

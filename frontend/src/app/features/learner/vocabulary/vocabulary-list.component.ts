@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { VocabularyService } from '../../../core/services/vocabulary.service';
 
 @Component({
   selector: 'app-vocabulary-list',
@@ -101,14 +102,9 @@ import { RouterModule } from '@angular/router';
     </div>
   `
 })
-export class VocabularyListComponent {
-  words = signal([
-    { term: 'Persistent', definition: 'Kiên trì, bền bỉ', level: 4 },
-    { term: 'Vocabulary', definition: 'Từ vựng', level: 5 },
-    { term: 'Effortless', definition: 'Không tốn sức, tự nhiên', level: 3 },
-    { term: 'Interactive', definition: 'Có tính tương tác', level: 2 },
-    { term: 'Community', definition: 'Cộng đồng', level: 5 },
-  ]);
+export class VocabularyListComponent implements OnInit {
+  vocabService = inject(VocabularyService);
+  words = signal<any[]>([]);
 
   // Animated Stats
   masteredCount = signal(0);
@@ -116,11 +112,18 @@ export class VocabularyListComponent {
   dueCount = signal(0);
   newCount = signal(0);
 
-  constructor() {
-    this.animateCount(850, this.masteredCount);
-    this.animateCount(320, this.learningCount);
-    this.animateCount(45, this.dueCount);
-    this.animateCount(12, this.newCount);
+  ngOnInit() {
+    this.loadStats();
+    // For now we don't have an API to list ALL vocabulary progress for the table
+    // but we can load the stats at least.
+  }
+
+  loadStats() {
+    this.vocabService.getStats().subscribe(stats => {
+      this.animateCount(stats.mastered, this.masteredCount);
+      this.animateCount(stats.learning, this.learningCount);
+      this.animateCount(stats.due, this.dueCount);
+    });
   }
 
   private animateCount(target: number, signalRef: any) {
