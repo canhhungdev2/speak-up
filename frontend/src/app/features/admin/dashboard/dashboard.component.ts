@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@ang
 import { CommonModule } from '@angular/common';
 import { StatCardComponent } from './stat-card.component';
 import { CourseService } from '../../../core/services/course.service';
+import { AnalyticsService } from '../../../core/services/analytics.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -12,6 +13,12 @@ import { CourseService } from '../../../core/services/course.service';
     <div class="space-y-10 pb-10">
       <!-- Stats Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <app-stat-card 
+          label="Truy cập hôm nay" 
+          [value]="todayVisits()" 
+          color="blue"
+          icon='<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>' />
+
         <app-stat-card 
           label="Tổng học viên" 
           value="2,380" 
@@ -32,14 +39,6 @@ import { CourseService } from '../../../core/services/course.service';
           [trend]="5.4" 
           color="emerald"
           icon='<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' />
-
-        <app-stat-card 
-          label="Doanh thu tháng này" 
-          value="324.70" 
-          suffix="$"
-          [trend]="-2.1" 
-          color="blue"
-          icon='<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' />
       </div>
 
 
@@ -52,9 +51,17 @@ import { CourseService } from '../../../core/services/course.service';
 })
 export class AdminDashboardComponent implements OnInit {
   private courseService = inject(CourseService);
+  private analyticsService = inject(AnalyticsService);
+
   courses = this.courseService.courses;
+  todayVisits = signal(0);
 
   ngOnInit() {
     this.courseService.findAll().subscribe();
+    this.analyticsService.getStats(1).subscribe(stats => {
+      if (stats && stats.length > 0) {
+        this.todayVisits.set(stats[0].visit_count);
+      }
+    });
   }
 }

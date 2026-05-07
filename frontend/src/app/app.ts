@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SupabaseService } from './core/services/supabase.service';
+import { AnalyticsService } from './core/services/analytics.service';
 
 @Component({
   selector: 'app-root',
@@ -12,4 +13,9 @@ import { SupabaseService } from './core/services/supabase.service';
 })
 export class App {
   supabaseService = inject(SupabaseService);
+  analyticsService = inject(AnalyticsService);
+
+  constructor() {
+    this.analyticsService.trackVisit();
+  }
 }
