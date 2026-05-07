@@ -5,12 +5,12 @@ import { ActivatedRoute } from '@angular/router';
 import { LessonEditService } from '../lesson-edit.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RichTextEditorComponent } from '../../../../shared/components/rich-text-editor.component';
-import { AdminAudioUploadComponent } from '../../../../shared/components/admin-audio-upload.component';
+import { AdminFileUploadComponent } from '../../../../shared/components/admin-file-upload.component';
 
 @Component({
   selector: 'app-admin-lesson-article',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RichTextEditorComponent, AdminAudioUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, RichTextEditorComponent, AdminFileUploadComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-in slide-in-from-bottom-10 duration-700">
@@ -47,14 +47,15 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
             <!-- Audio Upload -->
             <div class="lg:col-span-2 space-y-2">
               <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Audio Bài học (MP3)</label>
-              <app-admin-audio-upload 
+              <app-admin-file-upload 
                 formControlName="main_audio_url"
+                [accept]="'audio/mpeg'"
                 [courseSlug]="courseSlug"
                 [lessonSlug]="lessonSlug"
-                [customName]="'MainArticle'"
+                [customName]="'main-article'"
                 (uploadSuccess)="onAudioUpload($event)"
-              ></app-admin-audio-upload>
-      </div>
+              ></app-admin-file-upload>
+            </div>
           </div>
         </div>
 

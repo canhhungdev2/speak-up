@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LessonEditService } from '../lesson-edit.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AdminFileUploadComponent } from '../../../../shared/components/admin-file-upload.component';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-admin-lesson-commentary',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, AdminFileUploadComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-in slide-in-from-right-10 duration-500 max-w-4xl">
@@ -15,7 +17,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
         <div class="bg-white dark:bg-[#1e293b] p-10 rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-xl">
           <div class="flex items-center gap-5 mb-10">
             <div class="w-16 h-16 bg-indigo-500 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
             </div>
             <div>
               <h3 class="text-2xl font-black">Commentary</h3>
@@ -24,22 +26,30 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Audio Upload -->
             <div class="space-y-3">
-              <label class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Audio URL (.mp3)</label>
-              <div class="relative">
-                <input type="text" formControlName="commentary_audio_url" placeholder="https://..."
-                       class="w-full bg-gray-50 dark:bg-white/2 border-none rounded-2xl py-5 px-8 font-bold text-gray-900 dark:text-white focus:ring-4 focus:ring-primary/20 transition-all">
-                <span class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300">🎙️</span>
-              </div>
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Audio Commentary (.mp3)</label>
+              <app-admin-file-upload 
+                formControlName="commentary_audio_url"
+                [accept]="'audio/mpeg'"
+                [courseSlug]="courseSlug"
+                [lessonSlug]="lessonSlug"
+                [customName]="'commentary'"
+                [placeholder]="'Tải lên Audio Commentary'"
+              ></app-admin-file-upload>
             </div>
 
+            <!-- VTT Upload -->
             <div class="space-y-3">
-              <label class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Transcript (VTT URL)</label>
-              <div class="relative">
-                <input type="text" formControlName="commentary_vtt_url" placeholder="https://..."
-                       class="w-full bg-gray-50 dark:bg-white/2 border-none rounded-2xl py-5 px-8 font-bold text-gray-900 dark:text-white focus:ring-4 focus:ring-primary/20 transition-all">
-                <span class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300">📜</span>
-              </div>
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Transcript Commentary (.vtt)</label>
+              <app-admin-file-upload 
+                formControlName="commentary_vtt_url"
+                [accept]="'.vtt'"
+                [courseSlug]="courseSlug"
+                [lessonSlug]="lessonSlug"
+                [customName]="'commentary'"
+                [placeholder]="'Tải lên Transcript Commentary'"
+              ></app-admin-file-upload>
             </div>
           </div>
 
@@ -75,8 +85,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class AdminLessonCommentaryComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
   private lessonEditService = inject(LessonEditService);
   loading = this.lessonEditService.loading;
+
+  get courseSlug() { return this.route.parent?.snapshot.paramMap.get('courseSlug') || ''; }
+  get lessonSlug() { return this.route.parent?.snapshot.paramMap.get('lessonSlug') || ''; }
 
   commentaryForm = this.fb.group({
     commentary_audio_url: [''],

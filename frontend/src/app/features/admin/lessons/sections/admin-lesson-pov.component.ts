@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LessonEditService } from '../lesson-edit.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AdminFileUploadComponent } from '../../../../shared/components/admin-file-upload.component';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-admin-lesson-pov',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, AdminFileUploadComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-in slide-in-from-right-10 duration-500 max-w-4xl">
@@ -24,22 +26,30 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Audio Upload -->
             <div class="space-y-3">
-              <label class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Audio URL (.mp3)</label>
-              <div class="relative">
-                <input type="text" formControlName="pov_audio_url" placeholder="https://..."
-                       class="w-full bg-gray-50 dark:bg-white/2 border-none rounded-2xl py-5 px-8 font-bold text-gray-900 dark:text-white focus:ring-4 focus:ring-primary/20 transition-all">
-                <span class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300">🎵</span>
-              </div>
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Audio POV (.mp3)</label>
+              <app-admin-file-upload 
+                formControlName="pov_audio_url"
+                [accept]="'audio/mpeg'"
+                [courseSlug]="courseSlug"
+                [lessonSlug]="lessonSlug"
+                [customName]="'pov'"
+                [placeholder]="'Tải lên Audio POV'"
+              ></app-admin-file-upload>
             </div>
 
+            <!-- VTT Upload -->
             <div class="space-y-3">
-              <label class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Transcript (VTT URL)</label>
-              <div class="relative">
-                <input type="text" formControlName="pov_vtt_url" placeholder="https://..."
-                       class="w-full bg-gray-50 dark:bg-white/2 border-none rounded-2xl py-5 px-8 font-bold text-gray-900 dark:text-white focus:ring-4 focus:ring-primary/20 transition-all">
-                <span class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300">📄</span>
-              </div>
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Transcript POV (.vtt)</label>
+              <app-admin-file-upload 
+                formControlName="pov_vtt_url"
+                [accept]="'.vtt'"
+                [courseSlug]="courseSlug"
+                [lessonSlug]="lessonSlug"
+                [customName]="'pov'"
+                [placeholder]="'Tải lên Transcript POV'"
+              ></app-admin-file-upload>
             </div>
           </div>
 
@@ -75,8 +85,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class AdminLessonPovComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
   private lessonEditService = inject(LessonEditService);
   loading = this.lessonEditService.loading;
+
+  get courseSlug() { return this.route.parent?.snapshot.paramMap.get('courseSlug') || ''; }
+  get lessonSlug() { return this.route.parent?.snapshot.paramMap.get('lessonSlug') || ''; }
 
   povForm = this.fb.group({
     pov_audio_url: [''],

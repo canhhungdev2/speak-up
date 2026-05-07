@@ -7,12 +7,12 @@ import { LessonEditService } from '../lesson-edit.service';
 import { VocabularyService, Vocabulary } from '../../../../core/services/vocabulary.service';
 import { DictionaryService } from '../../../../core/services/dictionary.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AdminAudioUploadComponent } from '../../../../shared/components/admin-audio-upload.component';
+import { AdminFileUploadComponent } from '../../../../shared/components/admin-file-upload.component';
 
 @Component({
   selector: 'app-admin-lesson-vocabulary',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AdminAudioUploadComponent, DragDropModule],
+  imports: [CommonModule, ReactiveFormsModule, AdminFileUploadComponent, DragDropModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-in slide-in-from-right-10 duration-500">
@@ -31,13 +31,14 @@ import { AdminAudioUploadComponent } from '../../../../shared/components/admin-a
           
           <div class="max-w-2xl space-y-2">
             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tải lên Audio Từ vựng</label>
-            <app-admin-audio-upload 
+            <app-admin-file-upload 
               formControlName="vocab_audio_url"
+              [accept]="'audio/mpeg'"
               [courseSlug]="courseSlug"
               [lessonSlug]="lessonSlug"
-              [customName]="'Vocabulary'"
+              [customName]="'vocabulary'"
               (uploadSuccess)="onAudioUpload($event)"
-            ></app-admin-audio-upload>
+            ></app-admin-file-upload>
           </div>
         </div>
 

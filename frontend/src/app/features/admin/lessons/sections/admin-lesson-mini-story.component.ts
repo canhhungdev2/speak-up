@@ -1,13 +1,15 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { LessonEditService } from '../lesson-edit.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AdminMiniStoryModalComponent } from './admin-mini-story-modal.component';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-admin-lesson-mini-story',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, AdminMiniStoryModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-in slide-in-from-right-10 duration-500">
@@ -23,9 +25,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
                 <p class="text-sm text-gray-500 font-medium">Danh sách các câu chuyện ngắn đi kèm bài học</p>
               </div>
             </div>
-            <button type="button" (click)="addStory()" 
+            <button type="button" (click)="showModal.set(true)" 
                     class="px-6 py-3 bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-emerald-500/25">
-              + Thêm Mini Story
+              + Thêm Mini Story mới
             </button>
           </div>
 
@@ -37,22 +39,28 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
                     <span class="w-6 h-6 bg-white dark:bg-white/10 rounded-full flex items-center justify-center text-[10px] font-black text-gray-400">#{{ i + 1 }}</span>
                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Story Info</span>
                   </div>
-                  <button type="button" (click)="removeStory(i)" 
-                          class="p-2 text-gray-300 hover:text-rose-500 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                  </button>
+                  <div class="flex gap-1">
+                    <button type="button" (click)="editStory(i)" 
+                            class="p-2 text-gray-300 hover:text-emerald-500 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button type="button" (click)="removeStory(i)" 
+                            class="p-2 text-gray-300 hover:text-rose-500 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
                 </div>
 
                 <div class="space-y-4">
                   <div class="space-y-2">
                     <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Audio URL (.mp3)</label>
-                    <input type="text" formControlName="audio_url" 
-                           class="w-full bg-white dark:bg-white/5 border-none rounded-xl p-4 text-xs font-medium focus:ring-4 focus:ring-primary/20 transition-all">
+                    <input type="text" formControlName="audio_url" readonly
+                           class="w-full bg-gray-100 dark:bg-white/5 border-none rounded-xl p-4 text-[10px] font-medium text-gray-500">
                   </div>
                   <div class="space-y-2">
                     <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Transcript (VTT URL)</label>
-                    <input type="text" formControlName="vtt_url" 
-                           class="w-full bg-white dark:bg-white/5 border-none rounded-xl p-4 text-xs font-medium focus:ring-4 focus:ring-primary/20 transition-all">
+                    <input type="text" formControlName="vtt_url" readonly
+                           class="w-full bg-gray-100 dark:bg-white/5 border-none rounded-xl p-4 text-[10px] font-medium text-gray-500">
                   </div>
                 </div>
               </div>
@@ -62,7 +70,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
               <div class="col-span-full py-16 border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[3rem] flex flex-col items-center justify-center gap-4 text-gray-400">
                 <div class="w-16 h-16 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center text-2xl">📽️</div>
                 <p class="font-bold">Chưa có Mini Story nào.</p>
-                <button type="button" (click)="addStory()" class="text-primary text-xs font-black uppercase tracking-widest hover:underline">Tạo story đầu tiên</button>
+                <button type="button" (click)="showModal.set(true)" class="text-primary text-xs font-black uppercase tracking-widest hover:underline">Tạo story đầu tiên</button>
               </div>
             }
           </div>
@@ -81,13 +89,34 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
           </button>
         </div>
       </form>
+
+      <!-- Mini Story Modal -->
+      @if (showModal()) {
+        <app-admin-mini-story-modal
+          [courseSlug]="courseSlug"
+          [lessonSlug]="lessonSlug"
+          [nextIndex]="editingIndex() !== null ? editingIndex()! + 1 : stories.length + 1"
+          [isEditMode]="editingIndex() !== null"
+          [initialAudioUrl]="editingIndex() !== null ? stories.at(editingIndex()!).value.audio_url : ''"
+          [initialVttUrl]="editingIndex() !== null ? stories.at(editingIndex()!).value.vtt_url : ''"
+          (close)="closeModal()"
+          (save)="onSaveStory($event)"
+        ></app-admin-mini-story-modal>
+      }
     </div>
   `,
 })
 export class AdminLessonMiniStoryComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
   private lessonEditService = inject(LessonEditService);
+  
   loading = this.lessonEditService.loading;
+  showModal = signal(false);
+  editingIndex = signal<number | null>(null);
+
+  get courseSlug() { return this.route.parent?.snapshot.paramMap.get('courseSlug') || ''; }
+  get lessonSlug() { return this.route.parent?.snapshot.paramMap.get('lessonSlug') || ''; }
 
   msForm = this.fb.group({
     mini_stories: this.fb.array([])
@@ -99,14 +128,14 @@ export class AdminLessonMiniStoryComponent implements OnInit {
     this.lessonEditService.lesson$.pipe(takeUntilDestroyed()).subscribe((lesson: any) => {
       if (lesson) {
         this.stories.clear();
-        lesson.mini_stories?.forEach((ms: any) => this.addStory(ms));
+        lesson.mini_stories?.forEach((ms: any) => this.addStoryToForm(ms));
       }
     });
   }
 
   ngOnInit() {}
 
-  addStory(data?: any) {
+  addStoryToForm(data?: any) {
     this.stories.push(this.fb.group({
       id: [data?.id],
       audio_url: [data?.audio_url || '', [Validators.required]],
@@ -115,7 +144,41 @@ export class AdminLessonMiniStoryComponent implements OnInit {
     }));
   }
 
-  removeStory(index: number) { this.stories.removeAt(index); }
+  editStory(index: number) {
+    this.editingIndex.set(index);
+    this.showModal.set(true);
+  }
+
+  closeModal() {
+    this.showModal.set(false);
+    this.editingIndex.set(null);
+  }
+
+  onSaveStory(data: { audio_url: string; vtt_url: string }) {
+    if (this.editingIndex() !== null) {
+      // Edit mode
+      const group = this.stories.at(this.editingIndex()!);
+      group.patchValue({
+        audio_url: data.audio_url,
+        vtt_url: data.vtt_url
+      });
+    } else {
+      // Add mode
+      this.addStoryToForm({
+        ...data,
+        order_index: this.stories.length
+      });
+    }
+    this.closeModal();
+    this.onSave();
+  }
+
+  removeStory(index: number) { 
+    if (confirm('Bạn có chắc chắn muốn xóa Mini Story này?')) {
+      this.stories.removeAt(index);
+      this.onSave();
+    }
+  }
 
   onSave() {
     if (this.msForm.invalid) return;
