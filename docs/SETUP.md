@@ -1,61 +1,96 @@
-# Hướng dẫn thiết lập dự án SpeakUp (Setup Guide)
+# Hướng dẫn Thiết lập Dự án SpeakUp (Setup Guide)
 
-Tài liệu này tổng hợp toàn bộ các bước để dựng lại dự án từ con số 0.
+Chào mừng bạn đến với dự án SpeakUp! Tài liệu này sẽ hướng dẫn bạn từng bước để cài đặt môi trường và chạy dự án trên máy tính cục bộ.
 
-## 1. Yêu cầu hệ thống
-- Node.js (v18+)
-- PostgreSQL (hoặc Supabase)
-- Angular CLI & NestJS CLI
+## 📋 Yêu cầu hệ thống
 
-## 2. Thiết lập Biến môi trường (.env)
+Trước khi bắt đầu, hãy đảm bảo máy bạn đã cài đặt:
+- **Node.js**: Phiên bản 18.x trở lên.
+- **npm**: Thường đi kèm với Node.js.
+- **Git**: Để clone mã nguồn.
+- **Tài khoản Supabase**: Để quản lý Database và Authentication.
 
-### Backend (`/backend/.env`)
-Copy file `.env.example` thành `.env` và điền các giá trị:
-- `DATABASE_URL`: Đường dẫn kết nối Postgres.
-- `PORT`: 3000
+---
 
-Cài đặt thư viện bảo mật:
+## 🚀 Các bước cài đặt
+
+### Bước 1: Clone dự án
+
+Mở terminal và chạy lệnh:
 ```bash
-cd backend
-npm install jsonwebtoken jwks-rsa
+git clone https://github.com/your-username/speak-up.git
+cd speak-up
 ```
 
-### Frontend (`/frontend/src/environments/environment.ts`)
-Điền các giá trị từ Supabase:
-- `supabaseUrl`: URL dự án Supabase.
-- `supabaseKey`: Anon Public Key.
+### Bước 2: Cấu hình Backend
 
-## 3. Thiết lập Cơ sở dữ liệu (Database)
+1. Di chuyển vào thư mục backend:
+   ```bash
+   cd backend
+   ```
+2. Cài đặt các thư viện:
+   ```bash
+   npm install
+   ```
+3. Tạo file cấu hình môi trường:
+   Sao chép file `.env.example` thành `.env` và cập nhật thông tin:
+   ```bash
+   cp .env.example .env
+   ```
+   *Lưu ý: Bạn cần lấy `DATABASE_URL` từ Supabase Dashboard (Settings -> Database -> Connection String).*
 
-### Khởi tạo Schema
-Sử dụng TypeORM (hoặc Prisma) để đồng bộ schema:
+### Bước 3: Cấu hình Frontend
+
+1. Di chuyển vào thư mục frontend:
+   ```bash
+   cd ../frontend
+   ```
+2. Cài đặt các thư viện:
+   ```bash
+   npm install
+   ```
+3. Cấu hình Supabase trong code:
+   Mở file `frontend/src/environments/environment.ts` và điền thông tin dự án Supabase của bạn:
+   ```typescript
+   export const environment = {
+     production: false,
+     supabaseUrl: 'YOUR_SUPABASE_URL',
+     supabaseKey: 'YOUR_SUPABASE_ANON_KEY'
+   };
+   ```
+
+### Bước 4: Thiết lập Database trên Supabase
+
+1. **Tạo Project mới** trên [Supabase](https://supabase.com/).
+2. **Khởi tạo bảng**: Backend sử dụng TypeORM với tính năng `synchronize: true`, các bảng sẽ tự động được tạo khi bạn chạy backend lần đầu tiên.
+3. **Chạy SQL Scripts**: Truy cập vào **SQL Editor** trên Supabase và chạy các file trong `backend/database/scripts/` theo thứ tự:
+   - `01-sync-user-trigger.sql`: Tự động tạo profile và đồng bộ email người dùng.
+
+### Bước 5: Chạy ứng dụng
+
+Mở 2 cửa sổ terminal riêng biệt:
+
+**Terminal 1 (Backend):**
 ```bash
 cd backend
-npm run start:dev # Tự động tạo bảng nếu synchronize: true
-```
-
-### Chạy các Script SQL bổ sung (Quan trọng)
-Truy cập **SQL Editor** trên Supabase Dashboard và chạy các file trong thư mục `backend/database/scripts/` theo thứ tự:
-1. `01-sync-user-trigger.sql`: Tự động đồng bộ User từ Auth sang Profiles.
-
-## 4. Thiết lập Authentication (Google Login)
-Xem hướng dẫn chi tiết tại: [01a-google-auth-setup.md](./features/01a-google-auth-setup.md)
-
-## 5. Chạy ứng dụng
-
-### Backend
-```bash
-cd backend
-npm install
 npm run start:dev
 ```
 
-### Frontend
+**Terminal 2 (Frontend):**
 ```bash
 cd frontend
-npm install
 npm run start
 ```
 
+Ứng dụng sẽ khả dụng tại: `http://localhost:4200`
+
 ---
-*Cập nhật lần cuối: 03/05/2026*
+
+## 🛠 Troubleshooting (Xử lý sự cố)
+
+- **Lỗi Port 3000 đã bị sử dụng**: Backend mặc định chạy trên port 3000. Bạn có thể đổi trong file `.env` bằng cách sửa biến `PORT`.
+- **Lỗi Kết nối Database**: Kiểm tra xem địa chỉ IP của bạn đã được thêm vào "IP Allowlist" trên Supabase chưa (nếu có bật tính năng này).
+- **Lỗi Google Login**: Đảm bảo bạn đã cấu hình Redirect URL trong Supabase Auth là `http://localhost:4200/learner/courses`.
+
+---
+*Cập nhật lần cuối: 07/05/2026*
