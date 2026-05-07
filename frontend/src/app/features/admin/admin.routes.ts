@@ -29,6 +29,10 @@ export const ADMIN_ROUTES: Routes = [
           { path: '', redirectTo: 'article', pathMatch: 'full' }
         ]
       },
+      { 
+        path: 'vtt-generator', 
+        loadComponent: () => import('./lessons/vtt-creator.component').then(m => m.VttCreatorComponent) 
+      },
     ]
   },
 ];
