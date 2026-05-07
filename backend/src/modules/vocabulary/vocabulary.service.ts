@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual } from 'typeorm';
+import { Repository, LessThanOrEqual, MoreThanOrEqual, Between } from 'typeorm';
 import { Vocabulary } from '../../entities/vocabulary.entity';
 import { UserVocabularyProgress } from '../../entities/user-vocabulary-progress.entity';
 
@@ -140,8 +140,23 @@ export class VocabularyService {
     return results;
   }
 
+  async findAllProgressByUserId(userId: string) {
+    return this.progressRepository.find({
+      where: { user_id: userId },
+      relations: ['vocabulary'],
+      order: { next_review_at: 'ASC' }
+    });
+  }
+
+  async removeProgress(userId: string, progressId: string) {
+    return this.progressRepository.delete({ id: progressId, user_id: userId });
+  }
+
   async getStats(userId: string) {
-    const [mastered, learning, due] = await Promise.all([
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const [mastered, learning, due, newToday] = await Promise.all([
       this.progressRepository.countBy({ user_id: userId, status: 'mastered' }),
       this.progressRepository.countBy({ user_id: userId, status: 'learning' }),
       this.progressRepository.count({
@@ -149,9 +164,45 @@ export class VocabularyService {
           user_id: userId,
           next_review_at: LessThanOrEqual(new Date())
         }
+      }),
+      this.progressRepository.count({
+        where: {
+          user_id: userId,
+          created_at: MoreThanOrEqual(startOfToday)
+        }
       })
     ]);
 
-    return { mastered, learning, due };
+    return { mastered, learning, due, newToday };
+  }
+
+  async getForecast(userId: string) {
+    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const forecast: { label: string; count: number; value: number }[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < 7; i++) {
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + i);
+      
+      const nextDate = new Date(targetDate);
+      nextDate.setHours(23, 59, 59, 999);
+
+      const count = await this.progressRepository.count({
+        where: {
+          user_id: userId,
+          next_review_at: Between(targetDate, nextDate)
+        }
+      });
+
+      forecast.push({
+        label: days[targetDate.getDay()],
+        count: count,
+        value: count 
+      });
+    }
+
+    return forecast;
   }
 }

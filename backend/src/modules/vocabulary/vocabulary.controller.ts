@@ -20,6 +20,16 @@ export class VocabularyController {
     return this.vocabularyService.getStats(req.user.sub);
   }
 
+  @Get('all')
+  findAllProgress(@Req() req: any) {
+    return this.vocabularyService.findAllProgressByUserId(req.user.sub);
+  }
+
+  @Get('forecast')
+  getForecast(@Req() req: any) {
+    return this.vocabularyService.getForecast(req.user.sub);
+  }
+
   @Post('review')
   updateProgress(@Req() req: any, @Body() data: { vocabId: string, rating: 'again' | 'hard' | 'good' | 'easy' }) {
     return this.vocabularyService.updateSRSProgress(req.user.sub, data.vocabId, data.rating);
@@ -56,6 +66,11 @@ export class VocabularyController {
   @Roles('admin')
   update(@Param('id') id: string, @Body() data: Partial<Vocabulary>) {
     return this.vocabularyService.update(id, data);
+  }
+
+  @Delete('progress/:id')
+  removeProgress(@Req() req: any, @Param('id') id: string) {
+    return this.vocabularyService.removeProgress(req.user.sub, id);
   }
 
   @Delete(':id')

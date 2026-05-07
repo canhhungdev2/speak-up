@@ -310,7 +310,7 @@ export class StudyComponent implements OnInit {
           vocabId: item.vocabulary_id,
           term: item.vocabulary.term,
           ipa: item.vocabulary.ipa || '',
-          definition: item.vocabulary.definition,
+          definition: item.vocabulary.translation || item.vocabulary.definition_vi || item.vocabulary.definition,
           example: item.vocabulary.example || '',
           wordType: item.vocabulary.word_type || ''
         }));

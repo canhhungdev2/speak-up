@@ -33,6 +33,7 @@ export interface VocabularyStats {
   mastered: number;
   learning: number;
   due: number;
+  newToday: number;
 }
 
 @Injectable({
@@ -82,5 +83,17 @@ export class VocabularyService {
 
   getStats(): Observable<VocabularyStats> {
     return this.http.get<VocabularyStats>(`${this.apiUrl}/stats`);
+  }
+
+  getAllProgress(): Observable<UserVocabularyProgress[]> {
+    return this.http.get<UserVocabularyProgress[]>(`${this.apiUrl}/all`);
+  }
+
+  getForecast(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/forecast`);
+  }
+
+  deleteProgress(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/progress/${id}`);
   }
 }
