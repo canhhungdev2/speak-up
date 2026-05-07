@@ -473,9 +473,13 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
       });
     }
 
-    this.audio.addEventListener('timeupdate', () => this.currentTime.set(this.audio.currentTime));
+    this.audio.addEventListener('timeupdate', () => {
+      this.currentTime.set(this.audio.currentTime);
+    });
     this.audio.addEventListener('durationchange', () => this.duration.set(this.audio.duration));
-    this.audio.addEventListener('ended', () => this.isPlaying.set(false));
+    this.audio.addEventListener('ended', () => {
+      this.isPlaying.set(false);
+    });
   }
 
   ngOnDestroy() {

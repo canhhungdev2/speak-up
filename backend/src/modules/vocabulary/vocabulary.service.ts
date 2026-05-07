@@ -173,7 +173,10 @@ export class VocabularyService {
       })
     ]);
 
-    return { mastered, learning, due, newToday };
+    const total = mastered + learning;
+    const accuracy = total > 0 ? Math.round((mastered / total) * 100) : 0;
+
+    return { mastered, learning, due, newToday, accuracy };
   }
 
   async getForecast(userId: string) {

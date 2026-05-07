@@ -46,14 +46,31 @@ Dữ liệu được tải thực tế từ API `GET /vocabulary/all`.
 | **Mức 4** | 4/5 | **Nhớ khá tốt** | Interval từ 10 - 20 ngày. Ghi nhớ khá ổn định. |
 | **Mức 5** | 5/5 | **Đã thuộc lòng** | Interval >= 21 ngày. Đã đi vào bộ nhớ dài hạn. |
 
-## Kết nối Backend
-- `VocabularyService.getStats()` → `GET /vocabulary/stats`
-- `VocabularyService.getAllProgress()` → `GET /vocabulary/all`
-- `VocabularyService.deleteProgress(id)` → `DELETE /vocabulary/progress/:id`
+## Thống kê Dashboard (Analytics)
 
-## TODO / Còn thiếu
-- [x] Kết nối API `GET /vocabulary/stats` lấy thống kê thật
-- [x] Kết nối API lấy danh sách từ vựng theo tiến độ SRS
+Hệ thống cung cấp các chỉ số thời gian thực để người dùng theo dõi tiến độ:
+
+*   **Từ đã học (Words Learned)**: Tổng số từ có trạng thái `learning` hoặc `mastered`.
+*   **Đến hạn ôn (Due Now)**: Số từ đã đến thời điểm `next_review_at`.
+*   **Độ chính xác (Accuracy)**: Được tính theo tỷ lệ từ đã thuộc lòng trên tổng số từ trong lộ trình.
+    *   `Công thức: (Số từ Mastered) / (Tổng số từ trong lộ trình) * 100`
+*   **Số phút đã học (Study Time)**: Hiện đang sử dụng giá trị ước tính hoặc dữ liệu mẫu (để tối ưu tài nguyên Supabase Free).
+
+## API Endpoints
+
+*   `GET /vocabulary/stats`: Lấy thông tin thống kê tổng quan (mastered, learning, due, accuracy).
+*   `GET /vocabulary/forecast`: Lấy lịch ôn tập trong 7 ngày tới.
+*   `GET /vocabulary/all`: Danh sách toàn bộ quá trình học từ vựng của user.
+*   `DELETE /vocabulary/progress/:id`: Xóa một từ khỏi lộ trình học.
+
+## Checklist hoàn thành
+
+- [x] Backend SRS Logic (SM-2 simplified)
+- [x] Vocabulary Analytics Dashboard
+- [x] Real-time Accuracy calculation
+- [x] 7-day Review Forecast Chart
+- [x] Delete vocabulary progress functionality
+- [x] Optimized storage for Supabase Free Tier
 - [x] Logic lọc/tìm kiếm từ vựng theo thanh search
 - [ ] Modal thêm từ vựng mới (tích hợp dịch tự động?)
 - [ ] Phân trang (pagination) khi có nhiều từ

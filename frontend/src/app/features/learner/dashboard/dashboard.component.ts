@@ -236,6 +236,7 @@ export class LearnerDashboardComponent implements OnInit {
     this.vocabService.getStats().subscribe(stats => {
       this.wordsLearned.set(stats.mastered + stats.learning);
       this.wordsDue.set(stats.due);
+      this.accuracy.set(stats.accuracy);
     });
 
     // Load Forecast

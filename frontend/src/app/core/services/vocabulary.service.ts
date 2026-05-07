@@ -34,6 +34,7 @@ export interface VocabularyStats {
   learning: number;
   due: number;
   newToday: number;
+  accuracy: number;
 }
 
 @Injectable({

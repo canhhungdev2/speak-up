@@ -213,7 +213,6 @@ export class VocabularyListComponent implements OnInit {
     if (vocab.audio_url) {
       const audio = new Audio(vocab.audio_url);
       audio.play().catch(err => {
-        // Fallback to Web Speech API if audio file fails
         this.speak(vocab.term);
       });
     } else {
