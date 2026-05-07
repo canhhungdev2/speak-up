@@ -28,6 +28,8 @@ interface LessonSection {
   icon: string;
   type: 'article' | 'vocab' | 'story' | 'pov' | 'commentary';
   audioUrl: string;
+  vttUrl?: string;
+  sentences?: StorySentence[];
   content?: string;
   paragraphs?: { en: string; vi: string; }[];
   vocabList?: { term: string; definition: string; }[];
@@ -170,17 +172,49 @@ interface LessonSection {
                   </div>
                 }
                 @case ('pov') {
-                  <div class="bg-indigo-50/50 dark:bg-indigo-500/5 p-8 md:p-10 rounded-[2.5rem] border border-indigo-100/50">
-                      <p class="text-lg md:text-xl font-medium text-indigo-900/80 dark:text-indigo-300/80 leading-relaxed">
-                        Phần Point of View giúp bạn luyện tập ngữ pháp một cách tự nhiên bằng cách nghe lại câu chuyện ở các thời điểm khác nhau.
-                      </p>
+                  <div class="space-y-6">
+                    <div class="bg-indigo-50/50 dark:bg-indigo-500/5 p-8 md:p-10 rounded-[2.5rem] border border-indigo-100/50">
+                        <p class="text-lg md:text-xl font-medium text-indigo-900/80 dark:text-indigo-300/80 leading-relaxed">
+                          Phần Point of View giúp bạn luyện tập ngữ pháp một cách tự nhiên bằng cách nghe lại câu chuyện ở các thời điểm khác nhau.
+                        </p>
+                    </div>
+                    @if (activeSection().sentences?.length) {
+                      <div class="bg-white dark:bg-white/5 p-8 md:p-14 rounded-[2.5rem] border border-gray-100 dark:border-white/10 relative overflow-hidden shadow-sm">
+                        <div class="flex flex-wrap gap-x-2 gap-y-3">
+                          @for (s of activeSection().sentences; track $index) {
+                            <span [id]="'sentence-' + $index"
+                                  (click)="seekAudio(s.startTime)"
+                                  [class.bg-primary/20]="currentSentenceIndex() === $index"
+                                  class="text-xl md:text-3xl font-medium text-gray-700 dark:text-slate-300 leading-relaxed cursor-pointer rounded-lg px-1 py-0.5 transition-colors">
+                                {{ s.text }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
                   </div>
                 }
                 @case ('commentary') {
-                  <div class="p-8 bg-amber-50/50 dark:bg-amber-500/5 rounded-[2.5rem] border border-amber-100/50">
-                      <p class="text-base md:text-lg text-amber-900/70 dark:text-amber-300/70 leading-relaxed italic">
-                          Lắng nghe những chia sẻ thêm từ giáo viên về chủ đề của bài học.
-                      </p>
+                  <div class="space-y-6">
+                    <div class="p-8 bg-amber-50/50 dark:bg-amber-500/5 rounded-[2.5rem] border border-amber-100/50">
+                        <p class="text-base md:text-lg text-amber-900/70 dark:text-amber-300/70 leading-relaxed italic">
+                            Lắng nghe những chia sẻ thêm từ giáo viên về chủ đề của bài học.
+                        </p>
+                    </div>
+                    @if (activeSection().sentences?.length) {
+                      <div class="bg-white dark:bg-white/5 p-8 md:p-14 rounded-[2.5rem] border border-gray-100 dark:border-white/10 relative overflow-hidden shadow-sm">
+                        <div class="flex flex-wrap gap-x-2 gap-y-3">
+                          @for (s of activeSection().sentences; track $index) {
+                            <span [id]="'sentence-' + $index"
+                                  (click)="seekAudio(s.startTime)"
+                                  [class.bg-primary/20]="currentSentenceIndex() === $index"
+                                  class="text-xl md:text-3xl font-medium text-gray-700 dark:text-slate-300 leading-relaxed cursor-pointer rounded-lg px-1 py-0.5 transition-colors">
+                                {{ s.text }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
                   </div>
                 }
             }
@@ -341,7 +375,9 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
         title: 'Point of View',
         icon: '🔄',
         type: 'pov',
-        audioUrl: lesson.pov_audio_url
+        audioUrl: lesson.pov_audio_url,
+        vttUrl: lesson.pov_vtt_url,
+        sentences: []
       });
     }
 
@@ -352,7 +388,9 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
         title: 'Commentary',
         icon: '🎙️',
         type: 'commentary',
-        audioUrl: lesson.commentary_audio_url
+        audioUrl: lesson.commentary_audio_url,
+        vttUrl: lesson.commentary_vtt_url,
+        sentences: []
       });
     }
 
@@ -378,10 +416,21 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
   });
 
   currentSentenceIndex = computed(() => {
-    const story = this.currentStory();
-    if (!story) return -1;
+    const section = this.activeSection();
+    if (!section) return -1;
     const time = this.currentTime();
-    return story.sentences.findIndex(s => time >= s.startTime && time < s.endTime);
+
+    if (section.type === 'story' && section.stories) {
+      const story = this.currentStory();
+      if (!story) return -1;
+      return story.sentences.findIndex(s => time >= s.startTime && time < s.endTime);
+    }
+    
+    if (section.sentences) {
+      return section.sentences.findIndex(s => time >= s.startTime && time < s.endTime);
+    }
+
+    return -1;
   });
 
   private scrollEffect = effect(() => {
@@ -437,7 +486,7 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
     if (!section) return;
 
     let audioUrl = section.audioUrl;
-    let vttUrl = '';
+    let vttUrl = section.vttUrl || '';
 
     if (section.type === 'story' && section.stories) {
       const story = section.stories[this.activeStoryIndex()];
@@ -464,8 +513,10 @@ export class LessonPlayerComponent implements OnInit, OnDestroy {
 
     if (vttUrl) {
       this.mediaService.fetchAndParseVtt(vttUrl).subscribe(sentences => {
-        if (section.stories) {
+        if (section.type === 'story' && section.stories) {
           section.stories[this.activeStoryIndex()].sentences = sentences;
+        } else {
+          section.sentences = sentences;
         }
       });
     }
