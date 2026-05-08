@@ -15,247 +15,262 @@ interface ActivityDay {
   imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="p-4 md:p-8 space-y-8">
+    <div class="p-6 md:p-10 space-y-10 bg-slate-50/50 dark:bg-transparent min-h-screen">
       
-      <!-- Dynamic Welcome Banner -->
-      <div [class]="greetingTheme().bgClass" 
-            class="p-8 md:p-12 rounded-[3rem] text-white relative overflow-hidden shadow-2xl transition-all duration-1000">
-          <div class="relative z-10">
-            <div class="flex items-center gap-3 mb-4">
-                <span class="px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-widest">
-                  {{ greetingTheme().timeLabel }}
-                </span>
-            </div>
-            <h1 class="text-4xl md:text-6xl font-black mb-4 font-outfit tracking-tight leading-tight">
-                {{ greetingTheme().message }}, <br class="hidden md:block"> Cảnh Hưng!
-            </h1>
-            <p class="text-lg opacity-80 font-medium max-w-lg leading-relaxed">
-                {{ greetingTheme().subMessage }}
-            </p>
-          </div>
-          <!-- Decorative Background Icon -->
-          <div class="absolute right-[-20px] bottom-[-40px] opacity-10 transform rotate-12 scale-150 pointer-events-none">
-            <span class="text-[12rem]">{{ greetingTheme().icon }}</span>
-          </div>
-      </div>
-
-      <!-- Main Dashboard Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          <!-- Left Column: Stats & Heatmap -->
-          <div class="lg:col-span-2 space-y-8">
-            
-            <!-- Core Stats Row -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                @for (stat of stats(); track stat.label) {
-                  <div class="bg-white dark:bg-[#1e293b] p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all group">
-                      <div class="flex flex-col gap-3">
-                        <div [class]="stat.colorClass" class="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <span [innerHTML]="stat.icon"></span>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">{{ stat.label }}</p>
-                            <h3 class="text-2xl font-black text-gray-900 dark:text-white">{{ stat.value }}</h3>
-                        </div>
-                      </div>
-                  </div>
-                }
-            </div>
-
-            <!-- Contribution Heatmap Card -->
-            <div class="bg-white dark:bg-[#1e293b] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden">
-                <div class="flex justify-between items-center mb-8">
-                  <h3 class="font-bold text-gray-900 dark:text-white text-xl font-outfit">Sự kiên trì của bạn</h3>
-                  <div class="flex items-center gap-2">
-                      <span class="text-[10px] font-bold text-gray-400 uppercase">Less</span>
-                      <div class="flex gap-1">
-                        <div class="w-3 h-3 rounded-sm bg-gray-100 dark:bg-white/5"></div>
-                        <div class="w-3 h-3 rounded-sm bg-primary/20"></div>
-                        <div class="w-3 h-3 rounded-sm bg-primary/40"></div>
-                        <div class="w-3 h-3 rounded-sm bg-primary/70"></div>
-                        <div class="w-3 h-3 rounded-sm bg-primary"></div>
-                      </div>
-                      <span class="text-[10px] font-bold text-gray-400 uppercase">More</span>
-                  </div>
-                </div>
-
-                <!-- Heatmap Grid -->
-                <div class="overflow-x-auto scrollbar-hide pb-2">
-                  <div class="flex gap-1.5 w-max">
-                      @for (week of heatmapData(); track $index) {
-                        <div class="flex flex-col gap-1.5">
-                            @for (day of week; track day.date) {
-                              <div class="w-4 h-4 rounded-sm transition-all hover:ring-2 hover:ring-primary/50 cursor-pointer relative group/day"
-                                    [class.bg-gray-100]="day.intensity === 0"
-                                    [class.dark:bg-white/5]="day.intensity === 0"
-                                    [class.bg-primary/20]="day.intensity === 1"
-                                    [class.bg-primary/40]="day.intensity === 2"
-                                    [class.bg-primary/70]="day.intensity === 3"
-                                    [class.bg-primary]="day.intensity === 4">
-                                  <!-- Tooltip -->
-                                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/day:block z-50">
-                                    <div class="bg-gray-900 text-white text-[9px] font-black px-2 py-1 rounded shadow-xl whitespace-nowrap">
-                                        {{ day.count }} XP • {{ day.date | date:'MMM d' }}
-                                    </div>
-                                  </div>
-                              </div>
-                            }
-                        </div>
-                      }
-                  </div>
-                </div>
-                <p class="text-[10px] text-gray-400 dark:text-slate-500 mt-6 italic">
-                  Biểu đồ hiển thị hoạt động học tập của bạn trong 20 tuần qua. Đừng làm đứt chuỗi nhé!
-                </p>
-            </div>
-          </div>
-
-          <!-- Right Column: Goals & Forecast -->
-          <div class="space-y-8">
-            
-            <!-- Daily Goals Progress -->
-            <div class="bg-white dark:bg-[#1e293b] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm relative overflow-hidden group">
-                <h3 class="font-black text-gray-400 dark:text-slate-500 text-[10px] uppercase tracking-[0.2em] mb-8 font-outfit">Mục tiêu hôm nay</h3>
-                
-                <div class="space-y-8">
-                  <!-- XP Goal -->
-                  <div>
-                      <div class="flex justify-between items-end mb-3">
-                        <p class="font-black text-gray-900 dark:text-white">Điểm XP</p>
-                        <p class="text-sm font-bold text-primary">{{ dailyXP() }} / {{ goalXP() }}</p>
-                      </div>
-                      <div class="h-3 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000"
-                              [style.width.%]="(dailyXP() / goalXP()) * 100">
-                        </div>
-                      </div>
-                  </div>
-
-                  <!-- Lessons Goal -->
-                  <div>
-                      <div class="flex justify-between items-end mb-3">
-                        <p class="font-black text-gray-900 dark:text-white">Bài học</p>
-                        <p class="text-sm font-bold text-secondary">{{ dailyLessons() }} / {{ goalLessons() }}</p>
-                      </div>
-                      <div class="h-3 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-secondary to-orange-400 rounded-full transition-all duration-1000 shadow-sm"
-                              [style.width.%]="(dailyLessons() / goalLessons()) * 100">
-                        </div>
-                      </div>
-                  </div>
-                </div>
-
-                <button class="w-full mt-10 py-4 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all">
-                  Học tiếp ngay
-                </button>
-                
-                <!-- Decorative elements -->
-                <div class="absolute -top-6 -right-6 w-20 h-20 bg-primary/5 rounded-full blur-3xl"></div>
-            </div>
-
-            <!-- 7-Day Workload Forecast -->
-            <div class="bg-white dark:bg-[#1e293b] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col h-fit">
-              <h3 class="font-black text-gray-400 dark:text-slate-500 text-[10px] uppercase tracking-[0.2em] mb-10 font-outfit">Lịch ôn tập sắp tới</h3>
-              
-              <div class="flex items-end justify-between gap-2 px-2 h-32 relative">
-                  @if (forecast().length === 0) {
-                    <div class="absolute inset-0 flex items-center justify-center">
-                      <p class="text-[10px] font-bold text-gray-300 uppercase tracking-widest italic">Chưa có lịch ôn tập</p>
-                    </div>
-                  }
-                  @for (day of forecast(); track day.label) {
-                    <div class="flex flex-col items-center gap-4 flex-1 group/bar relative">
-                      <!-- Tooltip -->
-                      <div class="absolute bottom-full mb-2 hidden group-hover/bar:block z-20">
-                        <div class="bg-gray-900 text-white text-[10px] font-black px-2 py-1 rounded shadow-xl whitespace-nowrap">
-                          {{ day.count }} từ
-                        </div>
-                      </div>
-                      
-                      <div (click)="selectDay(day.label)" 
-                          class="w-full bg-gray-50 dark:bg-slate-800/50 rounded-full h-24 relative overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all">
-                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-secondary transition-all duration-1000 shadow-[0_-4px_10px_rgba(var(--primary-rgb),0.3)]" 
-                              [style.height.%]="day.value">
-                        </div>
-                      </div>
-                      <span class="text-[9px] font-black text-gray-400 dark:text-slate-500 uppercase">{{ day.label }}</span>
-                    </div>
+      <!-- Top Section: Welcome & Daily Goal -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        
+        <!-- Welcome Banner (8 columns) -->
+        <div [class]="greetingTheme().bgClass" 
+              class="lg:col-span-8 p-10 md:p-14 rounded-[3.5rem] text-white relative overflow-hidden shadow-2xl shadow-primary/20 transition-all duration-1000 group">
+            <div class="relative z-10 h-full flex flex-col justify-center">
+              <div class="flex items-center gap-3 mb-6">
+                  <span class="px-5 py-2 bg-white/20 backdrop-blur-xl rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-white/10">
+                    {{ greetingTheme().timeLabel }}
+                  </span>
+                  @if (streak() > 0) {
+                    <span class="px-5 py-2 bg-orange-500/30 backdrop-blur-xl rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-orange-400/20 flex items-center gap-2">
+                      <span class="animate-pulse">🔥</span> {{ streak() }} Ngày liên tục
+                    </span>
                   }
               </div>
+              <h1 class="text-5xl md:text-7xl font-black mb-6 font-outfit tracking-tight leading-[1.1]">
+                  {{ greetingTheme().message }}, <br class="hidden md:block"> {{ firstName() }}!
+              </h1>
+              <p class="text-lg md:text-xl opacity-90 font-medium max-w-xl leading-relaxed mb-8">
+                  {{ greetingTheme().subMessage }}
+              </p>
+              
+              <div class="flex flex-wrap gap-4">
+                <button routerLink="/learner/study" class="px-8 py-4 bg-white text-gray-900 font-black rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  HỌC TIẾP NGAY
+                </button>
+                <button routerLink="/learner/vocabulary" class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-black rounded-2xl hover:bg-white/20 transition-all flex items-center gap-3">
+                  ÔN TẬP
+                </button>
+              </div>
             </div>
+            
+            <div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
+            <div class="absolute bottom-[-10%] left-[20%] w-64 h-64 bg-black/10 rounded-full blur-3xl"></div>
+            
+            <div class="absolute right-10 bottom-10 opacity-20 transform rotate-12 scale-[2] pointer-events-none transition-transform group-hover:rotate-0 duration-700">
+              <span class="text-9xl">{{ greetingTheme().icon }}</span>
+            </div>
+        </div>
+
+        <!-- Daily Goal Circle (4 columns) -->
+        <div class="lg:col-span-4 bg-white dark:bg-[#1e293b] p-10 rounded-[3.5rem] border border-gray-100 dark:border-white/5 shadow-xl flex flex-col items-center justify-center text-center relative overflow-hidden">
+            <h3 class="font-black text-gray-400 dark:text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-8 font-outfit">Mục tiêu từ mới hôm nay</h3>
+            
+            <div class="relative w-52 h-52 flex items-center justify-center mb-6">
+              <svg class="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="8" class="text-gray-100 dark:text-white/5" />
+                <circle cx="50" cy="50" r="45" fill="none" 
+                        stroke="url(#goalGradient)" stroke-width="8" 
+                        stroke-linecap="round"
+                        class="transition-all duration-[1500ms] ease-out"
+                        [attr.stroke-dasharray]="283"
+                        [attr.stroke-dashoffset]="283 - (283 * goalPercent() / 100)" />
+                <defs>
+                  <linearGradient id="goalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#4f46e5" />
+                    <stop offset="100%" stop-color="#ec4899" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-5xl font-black text-gray-900 dark:text-white font-outfit tracking-tighter">{{ newToday() }}</span>
+                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">/ {{ goal() }} TỪ</span>
+              </div>
+            </div>
+
+            <p class="text-sm font-bold text-gray-500 dark:text-slate-400">
+              @if (newToday() >= goal()) {
+                <span class="text-emerald-500 flex items-center gap-2 justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                  Đã hoàn thành mục tiêu!
+                </span>
+              } @else {
+                Bạn cần thêm {{ goal() - newToday() }} từ nữa
+              }
+            </p>
+            <button class="mt-6 text-[10px] font-black text-primary uppercase tracking-widest hover:underline">Thay đổi mục tiêu</button>
+        </div>
+      </div>
+
+      <!-- Secondary Stats Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          @for (stat of stats(); track stat.label) {
+            <div class="bg-white dark:bg-[#1e293b] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group overflow-hidden relative">
+                <div [class]="'absolute top-0 right-0 w-20 h-20 opacity-50 rounded-full blur-2xl -mr-10 -mt-10 ' + stat.colorBg"></div>
+                <div class="flex flex-col gap-4 relative z-10">
+                  <div [class]="'w-12 h-12 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform shadow-sm ' + stat.colorClass">
+                      <span [innerHTML]="stat.icon"></span>
+                  </div>
+                  <div>
+                      <p class="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">{{ stat.label }}</p>
+                      <h3 class="text-3xl font-black text-gray-900 dark:text-white font-outfit">{{ stat.value }}</h3>
+                  </div>
+                </div>
+            </div>
+          }
+      </div>
+
+      <!-- Bottom Row: Heatmap & Forecast -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <!-- Heatmap -->
+          <div class="lg:col-span-2 bg-white dark:bg-[#1e293b] p-10 rounded-[3.5rem] border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden flex flex-col">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                <div>
+                  <h3 class="font-black text-gray-900 dark:text-white text-2xl font-outfit tracking-tight">Sự kiên trì của bạn</h3>
+                  <p class="text-sm text-gray-400 font-medium">Hoạt động học tập trong 20 tuần qua</p>
+                </div>
+                <div class="flex items-center gap-3 bg-gray-50 dark:bg-white/5 p-2 px-4 rounded-2xl">
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Less</span>
+                    <div class="flex gap-1.5">
+                      <div class="w-4 h-4 rounded-md bg-gray-100 dark:bg-white/10"></div>
+                      <div class="w-4 h-4 rounded-md bg-primary/30"></div>
+                      <div class="w-4 h-4 rounded-md bg-primary/60"></div>
+                      <div class="w-4 h-4 rounded-md bg-primary"></div>
+                    </div>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">More</span>
+                </div>
+              </div>
+              <div class="overflow-x-auto scrollbar-hide pb-2 mask-fade-right">
+                <div class="flex gap-2 w-max">
+                    @for (week of heatmapData(); track $index) {
+                      <div class="flex flex-col gap-2">
+                          @for (day of week; track day.date) {
+                            <div class="w-5 h-5 rounded-[0.4rem] transition-all hover:scale-125 cursor-pointer relative group/day"
+                                  [class.bg-gray-100]="day.intensity === 0"
+                                  [class.dark:bg-white/10]="day.intensity === 0"
+                                  [class.bg-primary/30]="day.intensity === 1"
+                                  [class.bg-primary/50]="day.intensity === 2"
+                                  [class.bg-primary/75]="day.intensity === 3"
+                                  [class.bg-primary]="day.intensity === 4">
+                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 hidden group-hover/day:block z-50 pointer-events-none">
+                                  <div class="bg-gray-900 text-white text-[10px] font-black px-3 py-2 rounded-xl shadow-2xl whitespace-nowrap">
+                                      {{ day.count }} Hoạt động • {{ day.date | date:'MMM d, y' }}
+                                  </div>
+                                  <div class="w-2 h-2 bg-gray-900 rotate-45 mx-auto -mt-1"></div>
+                                </div>
+                            </div>
+                          }
+                      </div>
+                    }
+                </div>
+              </div>
           </div>
 
-          <!-- Recent Discussions -->
-          <div class="lg:col-span-3 bg-white dark:bg-[#1e293b] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm">
-            <div class="flex justify-between items-center mb-8">
-                <h3 class="font-bold text-gray-900 dark:text-white text-2xl font-outfit">Cộng đồng đang thảo luận</h3>
-                <button class="text-primary font-bold text-sm hover:underline">Xem tất cả</button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="p-6 bg-gray-50 dark:bg-white/5 rounded-3xl flex items-start gap-5 hover:bg-gray-100 dark:hover:bg-white/10 transition-all border border-transparent hover:border-gray-200 dark:hover:border-white/10 group cursor-pointer">
-                  <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-500/20 rounded-2xl flex-shrink-0 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-black text-xl">P</div>
-                  <div>
-                      <p class="font-bold text-gray-800 dark:text-white text-lg leading-tight mb-2 group-hover:text-primary transition-colors">Làm sao để phát âm từ "Schedule" chuẩn?</p>
-                      <p class="text-sm text-gray-500 dark:text-slate-500">12 bình luận • 5 phút trước</p>
+          <!-- Forecast -->
+          <div class="bg-white dark:bg-[#1e293b] p-10 rounded-[3.5rem] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col">
+            <h3 class="font-black text-gray-900 dark:text-white text-2xl font-outfit tracking-tight mb-2">Dự báo ôn tập</h3>
+            <p class="text-sm text-gray-400 font-medium mb-12">Lịch trình trong 7 ngày tới</p>
+            <div class="flex items-end justify-between gap-3 h-48 relative px-2">
+                @if (forecast().length === 0) {
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <p class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">Chưa có lịch ôn tập</p>
                   </div>
-                </div>
-                <div class="p-6 bg-gray-50 dark:bg-white/5 rounded-3xl flex items-start gap-5 hover:bg-gray-100 dark:hover:bg-white/10 transition-all border border-transparent hover:border-gray-200 dark:hover:border-white/10 group cursor-pointer">
-                  <div class="w-14 h-14 bg-rose-100 dark:bg-rose-500/20 rounded-2xl flex-shrink-0 flex items-center justify-center text-rose-600 dark:text-rose-400 font-black text-xl">M</div>
-                  <div>
-                      <p class="font-bold text-gray-800 dark:text-white text-lg leading-tight mb-2 group-hover:text-primary transition-colors">Chia sẻ mẹo nhớ 50 từ vựng mỗi ngày</p>
-                      <p class="text-sm text-gray-500 dark:text-slate-500">28 bình luận • 1 giờ trước</p>
+                }
+                @for (day of forecast(); track day.label) {
+                  <div class="flex flex-col items-center gap-4 flex-1 group/bar relative">
+                    <span class="absolute -top-6 text-[10px] font-black text-primary opacity-0 group-hover/bar:opacity-100 transition-opacity">{{ day.count }}</span>
+                    <div (click)="selectDay(day.label)" 
+                        class="w-full bg-gray-50 dark:bg-slate-800/50 rounded-full h-32 relative overflow-hidden cursor-pointer hover:ring-4 hover:ring-primary/10 transition-all">
+                      <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-secondary transition-all duration-[1.5s] rounded-full" 
+                            [style.height.%]="day.value">
+                        <div class="absolute top-0 left-0 right-0 h-4 bg-white/20"></div>
+                      </div>
+                    </div>
+                    <span class="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-tighter">{{ day.label }}</span>
                   </div>
-                </div>
+                }
             </div>
           </div>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    :host { display: block; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .mask-fade-right {
+      mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    }
+  `]
 })
 export class LearnerDashboardComponent implements OnInit {
   vocabService = inject(VocabularyService);
 
-  // Goals
-  dailyXP = signal(240);
-  goalXP = signal(300);
-  dailyLessons = signal(2);
-  goalLessons = signal(3);
+  newToday = signal(0);
+  goal = signal(10);
+  streak = signal(5);
+  goalPercent = computed(() => Math.min((this.newToday() / this.goal()) * 100, 100));
 
-  // Animated Stats
   wordsLearned = signal(0);
   wordsDue = signal(0);
-  studyTime = signal(45);
-  accuracy = signal(92);
+  accuracy = signal(0);
+  masteredCount = signal(0);
+  forecast = signal<any[]>([]);
+  selectedDay = signal<string | null>(null);
 
   ngOnInit() {
     this.loadData();
   }
 
   loadData() {
-    // Load Stats
     this.vocabService.getStats().subscribe(stats => {
-      this.wordsLearned.set(stats.mastered + stats.learning);
+      this.wordsLearned.set(stats.learning + stats.mastered);
       this.wordsDue.set(stats.due);
-      this.accuracy.set(stats.accuracy);
+      this.accuracy.set(stats.accuracy || 0);
+      this.masteredCount.set(stats.mastered);
+      this.newToday.set(stats.newToday || 0);
     });
 
-    // Load Forecast
     this.vocabService.getForecast().subscribe(data => {
       const maxCount = Math.max(...data.map(d => d.count), 1);
       const normalizedData = data.map(d => ({
         ...d,
-        value: (d.count / maxCount) * 100 // Scale to percentage for bar height
+        value: (d.count / maxCount) * 100
       }));
       this.forecast.set(normalizedData);
     });
   }
 
   stats = computed(() => [
-    { label: 'Từ đã học', value: this.wordsLearned(), colorClass: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>' },
-    { label: 'Đến hạn ôn', value: this.wordsDue(), colorClass: 'bg-rose-100 dark:bg-rose-500/20 text-rose-600', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' },
-    { label: 'Phút đã học', value: this.studyTime(), colorClass: 'bg-amber-100 dark:bg-amber-500/20 text-amber-600', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>' },
-    { label: 'Chính xác', value: this.accuracy() + '%', colorClass: 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' },
+    { 
+      label: 'Đã thuộc lòng', 
+      value: this.masteredCount(), 
+      colorClass: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600',
+      colorBg: 'bg-emerald-500',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' 
+    },
+    { 
+      label: 'Đến hạn ôn', 
+      value: this.wordsDue(), 
+      colorClass: 'bg-rose-100 dark:bg-rose-500/20 text-rose-600',
+      colorBg: 'bg-rose-500',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' 
+    },
+    { 
+      label: 'Tổng số từ', 
+      value: this.wordsLearned(), 
+      colorClass: 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600',
+      colorBg: 'bg-indigo-500',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>' 
+    },
+    { 
+      label: 'Độ chính xác', 
+      value: this.accuracy() + '%', 
+      colorClass: 'bg-amber-100 dark:bg-amber-500/20 text-amber-600',
+      colorBg: 'bg-amber-500',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>' 
+    },
   ]);
+
+  firstName = signal('Cảnh Hưng');
 
   greetingTheme = computed(() => {
     const hour = new Date().getHours();
@@ -264,15 +279,15 @@ export class LearnerDashboardComponent implements OnInit {
         bgClass: 'bg-gradient-to-br from-amber-400 to-orange-600',
         timeLabel: 'Chào buổi sáng',
         message: 'Bắt đầu ngày mới',
-        subMessage: 'Ánh nắng mặt trời đã lên, hãy dành 15 phút rèn luyện tiếng Anh để khởi đầu ngày mới thật tỉnh táo nhé!',
+        subMessage: 'Một buổi sáng tuyệt vời để rèn luyện trí não. Hãy hoàn thành mục tiêu 10 từ hôm nay nhé!',
         icon: '☀️'
       };
     } else if (hour < 18) {
       return {
         bgClass: 'bg-gradient-to-br from-blue-500 to-indigo-700',
         timeLabel: 'Chào buổi chiều',
-        message: 'Tiếp thêm năng lượng',
-        subMessage: 'Bạn đang làm rất tốt! Một bài học ngắn lúc này sẽ giúp bạn duy trì sự tập trung cho phần còn lại của ngày.',
+        message: 'Duy trì năng lượng',
+        subMessage: 'Bạn đang đi đúng hướng rồi! Đừng quên ôn lại những từ vựng đến hạn hôm nay.',
         icon: '🌤️'
       };
     } else {
@@ -280,21 +295,17 @@ export class LearnerDashboardComponent implements OnInit {
         bgClass: 'bg-gradient-to-br from-indigo-900 to-[#0f172a]',
         timeLabel: 'Chào buổi tối',
         message: 'Hoàn thành ngày học',
-        subMessage: 'Hãy thư giãn và ôn tập lại những gì đã học hôm nay trước khi đi ngủ. Một giấc ngủ ngon sẽ giúp não bộ ghi nhớ tốt hơn.',
+        subMessage: 'Thư giãn một chút và dành 10 phút cuối ngày để kiểm tra lại kiến thức nhé.',
         icon: '🌙'
       };
     }
   });
 
   heatmapData = signal<ActivityDay[][]>(this.generateHeatmapData());
-  forecast = signal<any[]>([]);
-
-  selectedDay = signal<string | null>(null);
 
   private generateHeatmapData(): ActivityDay[][] {
     const data: ActivityDay[][] = [];
     const today = new Date();
-    // Generate 20 weeks of data
     for (let w = 0; w < 20; w++) {
       const week: ActivityDay[] = [];
       for (let d = 0; d < 7; d++) {
@@ -306,7 +317,6 @@ export class LearnerDashboardComponent implements OnInit {
         else if (xp > 200) intensity = 3;
         else if (xp > 100) intensity = 2;
         else if (xp > 20) intensity = 1;
-        
         week.push({ date, count: xp, intensity });
       }
       data.unshift(week);
