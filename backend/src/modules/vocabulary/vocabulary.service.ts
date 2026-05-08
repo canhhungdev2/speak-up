@@ -195,7 +195,9 @@ export class VocabularyService {
       const count = await this.progressRepository.count({
         where: {
           user_id: userId,
-          next_review_at: Between(targetDate, nextDate)
+          next_review_at: i === 0 
+            ? LessThanOrEqual(nextDate) // Today bar includes everything overdue + today
+            : Between(targetDate, nextDate)
         }
       });
 

@@ -61,7 +61,7 @@ type StudyPhase = 'front' | 'back' | 'done';
           </div>
 
           <span class="text-white/50 text-sm font-bold tabular-nums">
-            {{ currentIndex() + 1 }} / {{ queue().length }}
+            Còn lại: {{ remainingCount() }}
           </span>
         </header>
 
@@ -275,14 +275,23 @@ export class StudyComponent implements OnInit {
   currentIndex = signal(0);
   shaking = signal(false);
   isLoading = signal(false);
+  initialTotal = signal(0);
   results = signal({ total: 0, accuracy: 0, xp: 0, again: 0, hard: 0, good: 0, easy: 0 });
 
   private ratingCounts = { again: 0, hard: 0, good: 0, easy: 0 };
 
   queue = signal<StudyCard[]>([]);
-
+  
   currentCard = computed(() => this.queue()[this.currentIndex()]);
-  progressPercent = computed(() => (this.currentIndex() / this.queue().length) * 100);
+  remainingCount = computed(() => {
+    const total = this.queue().length;
+    return total - this.currentIndex();
+  });
+  progressPercent = computed(() => {
+    const total = this.initialTotal() || 1;
+    const finished = total - this.remainingCount();
+    return Math.min((finished / total) * 100, 100);
+  });
 
   particles = Array.from({ length: 30 }, (_, i) => ({
     id: i,
@@ -316,6 +325,7 @@ export class StudyComponent implements OnInit {
         }));
         
         this.queue.set(mapped);
+        this.initialTotal.set(mapped.length);
         this.phase.set('front');
       },
       error: (err) => {
@@ -363,8 +373,13 @@ export class StudyComponent implements OnInit {
           if (next >= this.queue().length) {
             this.finishSession();
           } else {
-            this.currentIndex.set(next);
+            // Reset phase to front first
             this.phase.set('front');
+            
+            // Wait a tiny bit for the animation to start before swapping content
+            setTimeout(() => {
+              this.currentIndex.set(next);
+            }, 150);
           }
         },
         error: (err) => {
@@ -376,7 +391,7 @@ export class StudyComponent implements OnInit {
   }
 
   private finishSession() {
-    const total = this.queue().length;
+    const total = this.initialTotal();
     const good = this.ratingCounts.good + this.ratingCounts.easy;
     const accuracy = Math.round((good / total) * 100);
     const xp = good * 10 + this.ratingCounts.hard * 5;

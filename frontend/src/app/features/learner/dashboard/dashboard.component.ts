@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } 
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { VocabularyService } from '../../../core/services/vocabulary.service';
+import { SupabaseService } from '../../../core/services/supabase.service';
 
 interface ActivityDay {
   date: Date;
@@ -22,32 +23,37 @@ interface ActivityDay {
         
         <!-- Welcome Banner (8 columns) -->
         <div [class]="greetingTheme().bgClass" 
-              class="lg:col-span-8 p-10 md:p-14 rounded-[3.5rem] text-white relative overflow-hidden shadow-2xl shadow-primary/20 transition-all duration-1000 group">
+              class="lg:col-span-8 p-8 md:p-12 rounded-[3rem] text-white relative overflow-hidden shadow-2xl shadow-primary/20 transition-all duration-1000 group">
             <div class="relative z-10 h-full flex flex-col justify-center">
-              <div class="flex items-center gap-3 mb-6">
-                  <span class="px-5 py-2 bg-white/20 backdrop-blur-xl rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-white/10">
+              <div class="flex items-center gap-3 mb-5">
+                  <span class="px-4 py-1.5 bg-white/20 backdrop-blur-xl rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-white/10">
                     {{ greetingTheme().timeLabel }}
                   </span>
                   @if (streak() > 0) {
-                    <span class="px-5 py-2 bg-orange-500/30 backdrop-blur-xl rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-orange-400/20 flex items-center gap-2">
+                    <span class="px-4 py-1.5 bg-orange-500/30 backdrop-blur-xl rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-orange-400/20 flex items-center gap-2">
                       <span class="animate-pulse">🔥</span> {{ streak() }} Ngày liên tục
                     </span>
                   }
               </div>
-              <h1 class="text-5xl md:text-7xl font-black mb-6 font-outfit tracking-tight leading-[1.1]">
+              <h1 class="text-4xl md:text-5xl font-black mb-5 font-outfit tracking-tight leading-[1.2]">
                   {{ greetingTheme().message }}, <br class="hidden md:block"> {{ firstName() }}!
               </h1>
-              <p class="text-lg md:text-xl opacity-90 font-medium max-w-xl leading-relaxed mb-8">
+              <p class="text-base md:text-lg opacity-90 font-medium max-w-lg leading-relaxed mb-8">
                   {{ greetingTheme().subMessage }}
               </p>
               
               <div class="flex flex-wrap gap-4">
-                <button routerLink="/learner/study" class="px-8 py-4 bg-white text-gray-900 font-black rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
+                <button routerLink="/learner/courses" class="px-8 py-4 bg-white text-gray-900 font-black rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   HỌC TIẾP NGAY
                 </button>
-                <button routerLink="/learner/vocabulary" class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-black rounded-2xl hover:bg-white/20 transition-all flex items-center gap-3">
+                <button routerLink="/learner/vocabulary/study" class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-black rounded-2xl hover:bg-white/20 transition-all flex items-center gap-3 relative group">
                   ÔN TẬP
+                  @if (wordsDue() > 0) {
+                    <span class="ml-2 px-2 py-0.5 bg-rose-500 text-[10px] rounded-full animate-pulse">
+                      {{ wordsDue() }}
+                    </span>
+                  }
                 </button>
               </div>
             </div>
@@ -60,72 +66,67 @@ interface ActivityDay {
             </div>
         </div>
 
-        <!-- Daily Goal Circle (4 columns) -->
-        <div class="lg:col-span-4 bg-white dark:bg-[#1e293b] p-10 rounded-[3.5rem] border border-gray-100 dark:border-white/5 shadow-xl flex flex-col items-center justify-center text-center relative overflow-hidden">
-            <h3 class="font-black text-gray-400 dark:text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-8 font-outfit">Mục tiêu từ mới hôm nay</h3>
-            
-            <div class="relative w-52 h-52 flex items-center justify-center mb-6">
-              <svg class="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="8" class="text-gray-100 dark:text-white/5" />
-                <circle cx="50" cy="50" r="45" fill="none" 
-                        stroke="url(#goalGradient)" stroke-width="8" 
-                        stroke-linecap="round"
-                        class="transition-all duration-[1500ms] ease-out"
-                        [attr.stroke-dasharray]="283"
-                        [attr.stroke-dashoffset]="283 - (283 * goalPercent() / 100)" />
-                <defs>
-                  <linearGradient id="goalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#4f46e5" />
-                    <stop offset="100%" stop-color="#ec4899" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div class="absolute inset-0 flex flex-col items-center justify-center">
-                <span class="text-5xl font-black text-gray-900 dark:text-white font-outfit tracking-tighter">{{ newToday() }}</span>
-                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">/ {{ goal() }} TỪ</span>
-              </div>
+        <!-- Forecast Chart (4 columns) - Replaced Daily Goal -->
+        <div class="lg:col-span-4 bg-white dark:bg-[#1e293b] p-8 rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col">
+          <div class="flex justify-between items-start mb-6">
+            <div>
+              <h3 class="font-black text-gray-900 dark:text-white text-xl font-outfit tracking-tight">Dự báo ôn tập</h3>
+              <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">7 ngày tới</p>
             </div>
-
-            <p class="text-sm font-bold text-gray-500 dark:text-slate-400">
-              @if (newToday() >= goal()) {
-                <span class="text-emerald-500 flex items-center gap-2 justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                  Đã hoàn thành mục tiêu!
-                </span>
-              } @else {
-                Bạn cần thêm {{ goal() - newToday() }} từ nữa
+            <div class="p-2 bg-primary/10 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2z" />
+              </svg>
+            </div>
+          </div>
+          
+          <div class="flex items-end justify-between gap-2 h-40 relative px-1">
+              @if (forecast().length === 0) {
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <p class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">Chưa có lịch</p>
+                </div>
               }
-            </p>
-            <button class="mt-6 text-[10px] font-black text-primary uppercase tracking-widest hover:underline">Thay đổi mục tiêu</button>
+              @for (day of forecast(); track day.label) {
+                <div class="flex flex-col items-center gap-3 flex-1 group/bar relative">
+                  <div (click)="selectDay(day.label)" 
+                      class="w-full bg-gray-50 dark:bg-slate-800/50 rounded-full h-28 relative overflow-hidden cursor-pointer hover:ring-4 hover:ring-primary/10 transition-all">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-secondary transition-all duration-[1.5s] rounded-full" 
+                          [style.height.%]="day.value">
+                    </div>
+                  </div>
+                  <span class="text-[9px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-tighter">{{ day.label }}</span>
+                </div>
+              }
+          </div>
         </div>
       </div>
 
       <!-- Secondary Stats Grid -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
           @for (stat of stats(); track stat.label) {
-            <div class="bg-white dark:bg-[#1e293b] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group overflow-hidden relative">
-                <div [class]="'absolute top-0 right-0 w-20 h-20 opacity-50 rounded-full blur-2xl -mr-10 -mt-10 ' + stat.colorBg"></div>
+            <div class="bg-white dark:bg-[#1e293b] p-6 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group overflow-hidden relative">
+                <div [class]="'absolute top-0 right-0 w-16 h-16 opacity-50 rounded-full blur-2xl -mr-8 -mt-8 ' + stat.colorBg"></div>
                 <div class="flex flex-col gap-4 relative z-10">
-                  <div [class]="'w-12 h-12 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform shadow-sm ' + stat.colorClass">
+                  <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform shadow-sm ' + stat.colorClass">
                       <span [innerHTML]="stat.icon"></span>
                   </div>
                   <div>
-                      <p class="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">{{ stat.label }}</p>
-                      <h3 class="text-3xl font-black text-gray-900 dark:text-white font-outfit">{{ stat.value }}</h3>
+                      <p class="text-[9px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">{{ stat.label }}</p>
+                      <h3 class="text-2xl font-black text-gray-900 dark:text-white font-outfit">{{ stat.value }}</h3>
                   </div>
                 </div>
             </div>
           }
       </div>
 
-      <!-- Bottom Row: Heatmap & Forecast -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <!-- Heatmap -->
-          <div class="lg:col-span-2 bg-white dark:bg-[#1e293b] p-10 rounded-[3.5rem] border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden flex flex-col">
-              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+      <!-- Bottom Row: Heatmap (Full Width) -->
+      <div class="grid grid-cols-1 gap-10">
+          <!-- Heatmap Section -->
+          <div class="bg-white dark:bg-[#1e293b] p-8 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden flex flex-col">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                 <div>
-                  <h3 class="font-black text-gray-900 dark:text-white text-2xl font-outfit tracking-tight">Sự kiên trì của bạn</h3>
-                  <p class="text-sm text-gray-400 font-medium">Hoạt động học tập trong 20 tuần qua</p>
+                  <h3 class="font-black text-gray-900 dark:text-white text-xl font-outfit tracking-tight">Sự kiên trì của bạn</h3>
+                  <p class="text-xs text-gray-400 font-medium">Hoạt động trong 20 tuần qua</p>
                 </div>
                 <div class="flex items-center gap-3 bg-gray-50 dark:bg-white/5 p-2 px-4 rounded-2xl">
                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Less</span>
@@ -163,32 +164,6 @@ interface ActivityDay {
                 </div>
               </div>
           </div>
-
-          <!-- Forecast -->
-          <div class="bg-white dark:bg-[#1e293b] p-10 rounded-[3.5rem] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col">
-            <h3 class="font-black text-gray-900 dark:text-white text-2xl font-outfit tracking-tight mb-2">Dự báo ôn tập</h3>
-            <p class="text-sm text-gray-400 font-medium mb-12">Lịch trình trong 7 ngày tới</p>
-            <div class="flex items-end justify-between gap-3 h-48 relative px-2">
-                @if (forecast().length === 0) {
-                  <div class="absolute inset-0 flex items-center justify-center">
-                    <p class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">Chưa có lịch ôn tập</p>
-                  </div>
-                }
-                @for (day of forecast(); track day.label) {
-                  <div class="flex flex-col items-center gap-4 flex-1 group/bar relative">
-                    <span class="absolute -top-6 text-[10px] font-black text-primary opacity-0 group-hover/bar:opacity-100 transition-opacity">{{ day.count }}</span>
-                    <div (click)="selectDay(day.label)" 
-                        class="w-full bg-gray-50 dark:bg-slate-800/50 rounded-full h-32 relative overflow-hidden cursor-pointer hover:ring-4 hover:ring-primary/10 transition-all">
-                      <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary to-secondary transition-all duration-[1.5s] rounded-full" 
-                            [style.height.%]="day.value">
-                        <div class="absolute top-0 left-0 right-0 h-4 bg-white/20"></div>
-                      </div>
-                    </div>
-                    <span class="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-tighter">{{ day.label }}</span>
-                  </div>
-                }
-            </div>
-          </div>
       </div>
     </div>
   `,
@@ -203,10 +178,13 @@ interface ActivityDay {
 })
 export class LearnerDashboardComponent implements OnInit {
   vocabService = inject(VocabularyService);
+  supabaseService = inject(SupabaseService);
 
   newToday = signal(0);
-  goal = signal(10);
-  streak = signal(5);
+  profile = computed(() => this.supabaseService.profile());
+  
+  goal = computed(() => this.profile()?.daily_goal || 10);
+  streak = computed(() => this.profile()?.current_streak || 0);
   goalPercent = computed(() => Math.min((this.newToday() / this.goal()) * 100, 100));
 
   wordsLearned = signal(0);
@@ -230,12 +208,14 @@ export class LearnerDashboardComponent implements OnInit {
     });
 
     this.vocabService.getForecast().subscribe(data => {
-      const maxCount = Math.max(...data.map(d => d.count), 1);
-      const normalizedData = data.map(d => ({
-        ...d,
-        value: (d.count / maxCount) * 100
-      }));
-      this.forecast.set(normalizedData);
+      if (Array.isArray(data)) {
+        const maxCount = Math.max(...data.map(d => d.count), 1);
+        const normalizedData = data.map(d => ({
+          ...d,
+          value: (d.count / maxCount) * 100
+        }));
+        this.forecast.set(normalizedData);
+      }
     });
   }
 
@@ -270,7 +250,18 @@ export class LearnerDashboardComponent implements OnInit {
     },
   ]);
 
-  firstName = signal('Cảnh Hưng');
+  firstName = computed(() => {
+    const profile = this.supabaseService.profile();
+    const name = profile?.full_name || profile?.username;
+    
+    if (name && name !== 'New Learner') {
+      // Split by space and take the last part as the first name (Vietnamese style)
+      // Or just return the whole name if no spaces
+      return name.trim().split(' ').pop() || name;
+    }
+    
+    return 'Học viên';
+  });
 
   greetingTheme = computed(() => {
     const hour = new Date().getHours();
